@@ -11,7 +11,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="favicon.png" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<script>window.__PWA__ = true; window.__APP_VERSION__ = 3;</script>
+<script>window.__PWA__ = true; window.__APP_VERSION__ = 4;</script>
 <title>Meu Ministério</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -815,8 +815,33 @@ connect();
 
 <script>
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' })
+    .then(reg => { window.__swReg = reg; }).catch(() => {}));
 }
+// Confere se existe versão nova ao abrir e ao voltar para o app.
+(function(){
+  let checking = false;
+  async function checkUpdate(){
+    if (checking || !navigator.onLine) return; checking = true;
+    try {
+      const r = await fetch('version.json?t=' + Date.now(), { cache: 'no-store' });
+      const v = (await r.json()).version;
+      if (v > window.__APP_VERSION__) {
+        const k = 'reloaded-for-' + v;
+        if (!sessionStorage.getItem(k)) {
+          sessionStorage.setItem(k, '1');
+          if (window.__swReg) { try { await window.__swReg.update(); } catch(e){} }
+          location.reload();
+          return;
+        }
+      }
+    } catch(e) {}
+    checking = false;
+  }
+  window.addEventListener('load', checkUpdate);
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') checkUpdate(); });
+  window.addEventListener('pageshow', e => { if (e.persisted) checkUpdate(); });
+})();
 if (navigator.storage && navigator.storage.persist) { navigator.storage.persist().catch(() => {}); }
 </script>
 </body>

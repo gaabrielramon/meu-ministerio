@@ -1,5 +1,5 @@
 // Meu Ministério — funciona sem internet depois da primeira abertura.
-const CACHE = 'meu-ministerio-v2';
+const CACHE = 'meu-ministerio-v3';
 const CORE = ['./', './index.html', './manifest.webmanifest',
   './icon-192.png', './icon-512.png', './maskable-512.png',
   './apple-touch-icon.png', './favicon.png'];

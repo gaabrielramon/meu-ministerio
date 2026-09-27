@@ -11,7 +11,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="favicon.png" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<script>window.__PWA__ = true; window.__APP_VERSION__ = 7;</script>
+<script>window.__PWA__ = true; window.__APP_VERSION__ = 12;</script>
 <title>Meu Ministério</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -210,6 +210,14 @@ a.addrlink:active{background:var(--accent-soft)}
 a.addrlink .addrtxt{text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
 a.addrlink svg{stroke:var(--accent)}
 .hint{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;background:var(--accent-soft);border-radius:10px;padding:8px 12px;font-size:.88rem}
+.sugs{display:flex;flex-direction:column;gap:6px}
+.sugs:empty{display:none}
+.sug{display:flex;justify-content:space-between;align-items:center;gap:10px;text-align:left;border:1px solid var(--line);background:var(--ground);border-radius:10px;padding:9px 12px;font-size:.92rem;font-weight:600;color:var(--ink);width:100%}
+.sug small{font-size:.72rem;color:var(--muted);font-weight:600;white-space:nowrap}
+.sug:active{background:var(--accent-soft)}
+.catalog{display:flex;flex-direction:column;gap:6px;max-height:22rem;overflow-y:auto;padding-right:2px}
+.pubfield .row{justify-content:space-between}
+a.jwlink{color:var(--accent);font-weight:700;font-size:.85rem;text-decoration:none;white-space:nowrap}
 .banner{background:var(--amber-soft);color:var(--ink);border-radius:12px;padding:14px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
 
 /* Bottom nav */
@@ -267,7 +275,7 @@ const TYPES = {
   especial:{label:'Pioneiro especial', desc:'Meta mensal de horas', month:130, year:0},
 };
 const IS_PWA = !!window.__PWA__;
-const MONTHS_SHORT = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+const MONTHS_SHORT = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 const WEEK = ['dom','seg','ter','qua','qui','sex','sáb'];
 const WEEK_FULL = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
 
@@ -279,7 +287,10 @@ const todayISO = () => { const d=new Date(); return `${d.getFullYear()}-${pad(d.
 const monthKeyOf = iso => iso.slice(0,7);
 const curMonthKey = () => monthKeyOf(todayISO());
 const addMonths = (key, n) => { let [y,m]=key.split('-').map(Number); m+=n; while(m>12){m-=12;y++} while(m<1){m+=12;y--} return `${y}-${pad(m)}`; };
-const monthName = key => { const [y,m]=key.split('-').map(Number); return new Date(y,m-1,1).toLocaleDateString('pt-BR',{month:'long',year:'numeric'}); };
+const MONTH_RE = /\b(janeiro|fevereiro|março|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro|jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez)\b/g;
+const capMonths = t => String(t).replace(MONTH_RE, w => w[0].toUpperCase()+w.slice(1));
+const ptDate = (d, opts) => capMonths(d.toLocaleDateString('pt-BR', opts));
+const monthName = key => { const [y,m]=key.split('-').map(Number); return ptDate(new Date(y,m-1,1),{month:'long',year:'numeric'}); };
 const serviceYearStart = key => { const [y,m]=key.split('-').map(Number); return m>=9 ? y : y-1; };
 const fmtHM = min => { min=Math.max(0,Math.round(min)); const h=Math.floor(min/60), m=min%60; return m ? `${h}h${pad(m)}` : `${h}h`; };
 const fmtClock = ms => { const s=Math.floor(ms/1000); return `${pad(Math.floor(s/3600))}:${pad(Math.floor(s/60)%60)}:${pad(s%60)}`; };
@@ -559,7 +570,7 @@ function calendar(key){
   if(state.selDay && monthKeyOf(state.selDay)===key){
     const dt=new Date(state.selDay+'T12:00:00'), min=byDay[state.selDay]||0;
     const n=month(key).entries.filter(e=>e.date===state.selDay).length;
-    detail=`<div class="daydetail"><div><b>${WEEK_FULL[dt.getDay()]}, ${dt.getDate()} de ${dt.toLocaleDateString('pt-BR',{month:'long'})}</b><div class="small muted">${min?`${fmtHM(min)} em ${n} ${n===1?'lançamento':'lançamentos'}`:'Nenhum tempo lançado'}</div></div>${state.selDay<=today?`<button class="btn" data-act="addday">Lançar neste dia</button>`:''}</div>`;
+    detail=`<div class="daydetail"><div><b>${WEEK_FULL[dt.getDay()]}, ${dt.getDate()} de ${ptDate(dt,{month:'long'})}</b><div class="small muted">${min?`${fmtHM(min)} em ${n} ${n===1?'lançamento':'lançamentos'}`:'Nenhum tempo lançado'}</div></div>${state.selDay<=today?`<button class="btn" data-act="addday">Lançar neste dia</button>`:''}</div>`;
     const dayEntries = month(key).entries.filter(e=>e.date===state.selDay).sort((a,b)=>(a.at||0)-(b.at||0));
     if(state.editing && state.editing.where==='cal') detail += editorHtml();
     else if(dayEntries.length) detail += `<div class="dayentries">${dayEntries.map(e=>`<div class="dayentry"><div><span class="dur num" style="font-family:var(--mono);font-weight:600">${fmtHM(e.min)}</span>${e.kind==='credito'?'<span class="tag">crédito</span>':''}${e.note?`<div class="note">${esc(e.note)}</div>`:''}</div><button class="linkbtn" data-edit="${esc(e.id)}" data-where="cal">Editar</button></div>`).join('')}</div>`;
@@ -607,7 +618,7 @@ function viewAno(){
   return `
   <div class="mnav">
     <button class="iconbtn" data-year="-1" aria-label="Ano de serviço anterior">‹</button>
-    <div style="text-align:center"><div class="eyebrow">Ano de serviço</div><h2>set/${y} – ago/${y+1}</h2></div>
+    <div style="text-align:center"><div class="eyebrow">Ano de serviço</div><h2>Set/${y} – Ago/${y+1}</h2></div>
     <button class="iconbtn" data-year="1" aria-label="Próximo ano de serviço" ${y>=serviceYearStart(cur)?'disabled':''}>›</button>
   </div>
   <section class="card">
@@ -759,6 +770,26 @@ const ICON = {
   pin:'<svg viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>',
   cal:'<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
 };
+const PUBS = [{"c": "Cursos da Bíblia", "t": "Seja Feliz para Sempre! — Um Curso da Bíblia para Você", "u": "https://www.jw.org/pt/biblioteca/livros/seja-feliz-para-sempre/"}, {"c": "Cursos da Bíblia", "t": "Seja Feliz para Sempre! — Comece a Aprender sobre a Bíblia", "u": "https://www.jw.org/pt/biblioteca/brochuras/seja-feliz-para-sempre-revista/"}, {"c": "Cursos da Bíblia", "t": "Aprenda com a Sabedoria de Jesus", "u": "https://www.jw.org/pt/biblioteca/brochuras/aprenda-com-sabedoria-de-jesus/"}, {"c": "Folhetos", "t": "É Possível Viver Feliz Para Sempre?", "u": "https://www.jw.org/pt/biblioteca/folhetos/futuro/"}, {"c": "Folhetos", "t": "Como Ter Uma Família Feliz?", "u": "https://www.jw.org/pt/biblioteca/folhetos/familia/"}, {"c": "Folhetos", "t": "Quem É o Verdadeiro Deus?", "u": "https://www.jw.org/pt/biblioteca/folhetos/deus/"}, {"c": "Folhetos", "t": "Alguém Ouve Nossas Orações?", "u": "https://www.jw.org/pt/biblioteca/folhetos/oracao/"}, {"c": "Folhetos", "t": "Os Conselhos de Jesus Funcionam Hoje?", "u": "https://www.jw.org/pt/biblioteca/folhetos/jesus/"}, {"c": "Folhetos", "t": "Como o Reino de Deus Vai Resolver Nossos Problemas?", "u": "https://www.jw.org/pt/biblioteca/folhetos/reino-de-deus/"}, {"c": "Folhetos", "t": "A Dor e a Tristeza Vão Acabar Algum Dia?", "u": "https://www.jw.org/pt/biblioteca/folhetos/sofrimento/"}, {"c": "Folhetos", "t": "Será Que as Pessoas Que Amamos Voltarão a Viver?", "u": "https://www.jw.org/pt/biblioteca/folhetos/morte/"}, {"c": "Folhetos", "t": "Deus Aprova Todas as Religiões?", "u": "https://www.jw.org/pt/biblioteca/folhetos/religiao/"}, {"c": "Folhetos", "t": "A Última Semana de Jesus na Terra", "u": "https://www.jw.org/pt/biblioteca/folhetos/A-%C3%9Altima-Semana-de-Jesus-na-Terra/"}, {"c": "Folhetos de 2015", "t": "O Que Você Acha da Bíblia? (T-30)", "u": "https://wol.jw.org/pt/wol/publication/r5/lp-t/T-30"}, {"c": "Folhetos de 2015", "t": "O Que Você Espera do Futuro? (T-31)", "u": "https://wol.jw.org/pt/wol/publication/r5/lp-t/T-31"}, {"c": "Folhetos de 2015", "t": "Qual o Segredo para Ter uma Família Feliz? (T-32)", "u": "https://wol.jw.org/pt/wol/publication/r5/lp-t/T-32"}, {"c": "Folhetos de 2015", "t": "Quem Controla o Mundo? (T-33)", "u": "https://wol.jw.org/pt/wol/publication/r5/lp-t/T-33"}, {"c": "Folhetos de 2015", "t": "O Sofrimento Vai Acabar Algum Dia? (T-34)", "u": "https://wol.jw.org/pt/wol/publication/r5/lp-t/T-34"}, {"c": "Folhetos de 2015", "t": "Será Que os Mortos Podem Voltar a Viver? (T-35)", "u": "https://wol.jw.org/pt/wol/publication/r5/lp-t/T-35"}, {"c": "Folhetos de 2015", "t": "O Que É o Reino de Deus? (T-36)", "u": "https://wol.jw.org/pt/wol/publication/r5/lp-t/T-36"}, {"c": "Folhetos de 2015", "t": "Respostas para as Perguntas Mais Importantes da Vida (T-37)", "u": "https://wol.jw.org/pt/wol/publication/r5/lp-t/T-37"}, {"c": "Revistas", "t": "A Sentinela N.º 1 2026 — Paz mundial: Apenas um sonho?", "u": "https://www.jw.org/pt/biblioteca/revistas/sentinela-no1-2026/"}, {"c": "Revistas", "t": "A Sentinela N.º 1 2025 — O fim das guerras: Como?", "u": "https://www.jw.org/pt/biblioteca/revistas/sentinela-no1-2025/"}, {"c": "Revistas", "t": "A Sentinela N.º 1 2024 — Como saber o que é certo e errado?", "u": "https://www.jw.org/pt/biblioteca/revistas/sentinela-no1-2024/"}, {"c": "Revistas", "t": "Despertai! N.º 1 2026 — O que fazer se me sinto sozinho?", "u": "https://www.jw.org/pt/biblioteca/revistas/despertai-no1-2026/"}, {"c": "Revistas", "t": "Despertai! N.º 1 2025 — 5 dicas para lidar com a alta nos preços", "u": "https://www.jw.org/pt/biblioteca/revistas/despertai-no1-2025/"}, {"c": "Revistas", "t": "Despertai! N.º 1 2024 — O que aconteceu com o respeito?", "u": "https://www.jw.org/pt/biblioteca/revistas/despertai-no1-2024/"}, {"c": "Convites", "t": "Convite para reuniões congregacionais", "u": "https://www.jw.org/pt/biblioteca/folhetos/Convite-para-reuni%C3%B5es-congregacionais/"}, {"c": "Convites", "t": "Convite do congresso de 2026", "u": "https://www.jw.org/pt/biblioteca/folhetos/Convite-do-congresso-de-2026/"}, {"c": "Vídeos", "t": "Vídeo: Por que estudar a Bíblia?", "u": ""}, {"c": "Vídeos", "t": "Vídeo: Como é um estudo bíblico?", "u": ""}, {"c": "Vídeos", "t": "Vídeo: O que acontece em um Salão do Reino?", "u": ""}, {"c": "Vídeos", "t": "Vídeo: Quem são as Testemunhas de Jeová?", "u": ""}, {"c": "Vídeos", "t": "Vídeo: Deus tem nome?", "u": ""}, {"c": "Bíblia", "t": "Bíblia — Tradução do Novo Mundo", "u": "https://www.jw.org/pt/biblioteca/biblia/"}];
+const PUB_CATS = ["Cursos da Bíblia", "Folhetos", "Folhetos de 2015", "Revistas", "Convites", "Vídeos", "Bíblia"];
+const norm = t => String(t||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+function pubMatches(q){
+  const words = norm(q).replace(/\bt-(\d)/g,'t$1').split(/[^a-z0-9º]+/).filter(w=>w.length>=2);
+  if(!words.length) return [];
+  return PUBS.map((p,i)=>({p,i,score:words.filter(w=>{ const h=norm(p.t+' '+p.c); return h.includes(w) || h.replace(/-/g,'').includes(w); }).length})).filter(x=>x.score===words.length || (words.length>2 && x.score>=words.length-1)).sort((a,b)=>b.score-a.score).slice(0,6);
+}
+function pubFor(text){
+  const n=norm(text); if(!n) return null;
+  return PUBS.find(p=>p.u && n.includes(norm(p.t.split(' — ')[0].split(' (T-')[0])) && (p.c!=='Revistas' || n.includes(norm(p.t.split(' — ')[0])))) || null;
+}
+function sugHtml(q){
+  const f=state.pform; if(!f) return '';
+  if(f.showCatalog){
+    return `<div class="catalog">${PUB_CATS.map(c=>`<div class="eyebrow" style="margin-top:6px">${esc(c)}</div>${PUBS.map((p,i)=>p.c===c?`<button class="sug" data-pick="${i}">${esc(p.t)}</button>`:'').join('')}`).join('')}</div>`;
+  }
+  const m=pubMatches(q); if(!m.length) return '';
+  return m.map(x=>`<button class="sug" data-pick="${x.i}"><span>${esc(x.p.t)}</span><small>${esc(x.p.c)}</small></button>`).join('');
+}
 const DUR_UNITS = [['dias','dias'],['semanas','semanas'],['meses','meses'],['anos','anos']];
 function daysBetween(aISO, bISO){ return Math.round((new Date(bISO+'T12:00:00') - new Date(aISO+'T12:00:00'))/86400000); }
 function startFromDuration(n, unit){
@@ -793,7 +824,7 @@ function durationGuess(startISO){
   if(days>=14 && days%7===0) return {n:days/7, unit:'semanas'};
   return {n:days, unit:'dias'};
 }
-function fmtDateLong(iso){ return new Date(iso+'T12:00:00').toLocaleDateString('pt-BR',{weekday:'short', day:'numeric', month:'short'}).replace('.', ''); }
+function fmtDateLong(iso){ const t=ptDate(new Date(iso+'T12:00:00'),{weekday:'short', day:'numeric', month:'short'}).replace(/\./g,''); return t[0].toUpperCase()+t.slice(1); }
 function visitPill(r){
   if(!r.nextDate) return '<span class="pill">Sem data marcada</span>';
   const d=daysBetween(todayISO(), r.nextDate);
@@ -810,7 +841,11 @@ function personForm(){
   return `<section class="card editor" id="pformCard">
     <div class="head"><h2>${f.id ? (rev?'Editar revisita':'Editar estudante') : (rev?'Nova revisita':'Novo estudante')}</h2><button class="linkbtn" data-act="pcancel">Cancelar</button></div>
     <label class="f">Nome${rev?' da pessoa':' do estudante'}<input type="text" id="pName" maxlength="80" placeholder="Ex.: Dona Maria" value="${esc(f.name)}"></label>
-    <label class="f">${rev?'Assunto / publicação deixada':'Publicação que estão estudando'}<input type="text" id="pPub" maxlength="120" placeholder="${rev?'Ex.: folheto Boas Notícias, assunto sobre a família':'Ex.: Seja Feliz para Sempre!, lição 5'}" value="${esc(f.pub)}"></label>
+    <div class="pubfield" style="display:flex;flex-direction:column;gap:8px">
+      <label class="f">${rev?'Assunto':'Publicação que estão estudando'}<input type="text" id="pPub" maxlength="160" autocomplete="off" placeholder="Ex.: família, Seja Feliz…" value="${esc(f.pub)}"></label>
+      <div class="row"><span class="small muted">Publicações do jw.org</span><button class="linkbtn" data-act="pcatalog">${f.showCatalog?'Fechar lista':'Ver lista completa'}</button></div>
+      <div class="sugs" id="pSug">${sugHtml(f.pub)}</div>
+    </div>
     ${rev ? `
     <label class="f">Endereço<input type="text" id="pAddr" maxlength="160" placeholder="Rua, número, bairro" value="${esc(f.addr)}"></label>
     <div class="grid2">
@@ -843,7 +878,7 @@ function viewPessoas(){
       const armed=state.armed==='p:'+r.id;
       return `<article class="pcard">
         <div class="top"><h3>${esc(r.name)}</h3>${visitPill(r)}</div>
-        ${r.pub?`<div class="pline">${ICON.book}<span>${esc(r.pub)}</span></div>`:''}
+        ${r.pub?`<div class="pline">${ICON.book}<span>${esc(r.pub)}${(p=>p?` · <a class="jwlink" href="${esc(p.u)}" target="_blank" rel="noopener">Abrir no jw.org ›</a>`:'')(pubFor(r.pub))}</span></div>`:''}
         ${r.addr?`<a class="pline addrlink" href="${esc(mapUrl(r.addr))}" target="_blank" rel="noopener" aria-label="Abrir ${esc(r.addr)} no Google Maps">${ICON.pin}<span><span class="addrtxt">${esc(r.addr)}</span><span class="maplink">Abrir no Google Maps ›</span></span></a>`:''}
         ${r.notes?`<div class="pnotes">${esc(r.notes)}</div>`:''}
         <div class="pactions">
@@ -860,8 +895,8 @@ function viewPessoas(){
       const armed=state.armed==='p:'+e.id;
       return `<article class="pcard">
         <div class="top"><h3>${esc(e.name)}</h3></div>
-        <div><div class="eyebrow">Estudando há</div><div class="since">${esc(elapsedText(e.start))}</div><div class="small muted">desde ${new Date(e.start+'T12:00:00').toLocaleDateString('pt-BR',{day:'numeric',month:'long',year:'numeric'})}</div></div>
-        ${e.pub?`<div class="pline">${ICON.book}<span>${esc(e.pub)}</span></div>`:''}
+        <div><div class="eyebrow">Estudando há</div><div class="since">${esc(elapsedText(e.start))}</div><div class="small muted">desde ${ptDate(new Date(e.start+'T12:00:00'),{day:'numeric',month:'long',year:'numeric'})}</div></div>
+        ${e.pub?`<div class="pline">${ICON.book}<span>${esc(e.pub)}${(p=>p?` · <a class="jwlink" href="${esc(p.u)}" target="_blank" rel="noopener">Abrir no jw.org ›</a>`:'')(pubFor(e.pub))}</span></div>`:''}
         ${e.notes?`<div class="pnotes">${esc(e.notes)}</div>`:''}
         <div class="pactions">
           <button class="linkbtn" data-pedit="${esc(e.id)}">Editar</button>
@@ -904,6 +939,12 @@ document.addEventListener('click', e=>{
   if(b.dataset.accent){ state.profile.accent = b.dataset.accent===DEFAULT_ACCENT ? '' : b.dataset.accent; persistProfile(); render(); return; }
   if(b.dataset.fsize){ state.profile.fontSize=b.dataset.fsize; persistProfile(); render(); return; }
   if(b.dataset.mode){ state.profile.mode=b.dataset.mode; persistProfile(); render(); return; }
+  if(b.dataset.pick!==undefined && state.pform){
+    const pub=PUBS[Number(b.dataset.pick)]; const inp=$('#pPub');
+    state.pform.pub = pub.t + ', '; state.pform.showCatalog=false;
+    if(inp){ inp.value=state.pform.pub; const sg=$('#pSug'); if(sg) sg.innerHTML=''; const lb=document.querySelector('[data-act=pcatalog]'); if(lb) lb.textContent='Ver lista completa'; inp.focus(); try{ inp.setSelectionRange(inp.value.length, inp.value.length); }catch(e){} }
+    return;
+  }
   if(b.dataset.pview){ state.pview=b.dataset.pview; state.pform=null; state.armed=null; render(); return; }
   if(b.dataset.pedit){
     const id=b.dataset.pedit, rev=state.pview==='rev';
@@ -983,12 +1024,13 @@ document.addEventListener('click', e=>{
                                       : {kind:'est', id:null, name:'', pub:'', durN:'', durU:'meses', durTouched:false, notes:''};
     render(); const n=$('#pName'); if(n) n.focus();
   }
+  else if(act==='pcatalog'){ if(state.pform){ state.pform.showCatalog=!state.pform.showCatalog; const sg=$('#pSug'); if(sg) sg.innerHTML=sugHtml(state.pform.pub); b.textContent=state.pform.showCatalog?'Fechar lista':'Ver lista completa'; } }
   else if(act==='pcancel'){ state.pform=null; render(); }
   else if(act==='psave'){
     const f=state.pform; if(!f) return;
     const name=(f.name||'').trim(); if(!name){ toast('Escreva o nome'); const n=$('#pName'); if(n) n.focus(); return; }
     if(f.kind==='rev'){
-      const data={ name, pub:(f.pub||'').trim(), addr:(f.addr||'').trim(), nextDate:f.nextDate||'', nextTime:f.nextTime||'', notes:(f.notes||'').trim() };
+      const data={ name, pub:(f.pub||'').trim().replace(/,$/,''), addr:(f.addr||'').trim(), nextDate:f.nextDate||'', nextTime:f.nextTime||'', notes:(f.notes||'').trim() };
       if(f.id){ const it=state.people.revisits.find(x=>x.id===f.id); Object.assign(it,data); }
       else state.people.revisits.push(Object.assign({id:uid(), createdAt:Date.now()}, data));
     } else {
@@ -997,7 +1039,7 @@ document.addEventListener('click', e=>{
       let start = it ? it.start : todayISO();
       if(!it) start = (n>0) ? startFromDuration(n, f.durU) : todayISO();
       else if(f.durTouched) start = (n>0) ? startFromDuration(n, f.durU) : todayISO();
-      const data={ name, pub:(f.pub||'').trim(), start, notes:(f.notes||'').trim() };
+      const data={ name, pub:(f.pub||'').trim().replace(/,$/,''), start, notes:(f.notes||'').trim() };
       if(it) Object.assign(it,data); else state.people.students.push(Object.assign({id:uid(), createdAt:Date.now()}, data));
     }
     const wasEdit=!!f.id; state.pform=null; persistPeople(); render(); toast(wasEdit?'Alterações salvas':'Salvo');
@@ -1027,7 +1069,7 @@ document.addEventListener('click', e=>{
     const moved = ed.where==='cal' && state.selDay!==ed.date;
     if(ed.where==='cal'){ state.cursor=newKey; state.selDay=ed.date; }
     state.editing=null; render();
-    toast(moved ? `Movido para ${new Date(ed.date+'T12:00:00').toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'})}` : 'Lançamento atualizado');
+    toast(moved ? `Movido para ${ptDate(new Date(ed.date+'T12:00:00'),{weekday:'long',day:'numeric',month:'long'})}` : 'Lançamento atualizado');
   }
   else if(act==='rmphoto'){ state.profile.photo=''; persistProfile(); render(); toast('Foto removida'); }
   else if(act==='copy'){
@@ -1047,7 +1089,9 @@ document.addEventListener('input', e=>{
   if(['fDate','fH','fM','fNote'].includes(id)){ readDraft(); return; }
   if(state.pform && ['pName','pPub','pAddr','pDate','pTime','pNotes','pDurN','pDurU'].includes(id)){
     const f={pName:'name',pPub:'pub',pAddr:'addr',pDate:'nextDate',pTime:'nextTime',pNotes:'notes',pDurN:'durN',pDurU:'durU'}[id];
-    state.pform[f]=e.target.value; if(id==='pDurN'||id==='pDurU') state.pform.durTouched=true; return;
+    state.pform[f]=e.target.value; if(id==='pDurN'||id==='pDurU') state.pform.durTouched=true;
+    if(id==='pPub'){ state.pform.showCatalog=false; const sg=$('#pSug'); if(sg) sg.innerHTML=sugHtml(e.target.value); const lb=document.querySelector('[data-act=pcatalog]'); if(lb) lb.textContent='Ver lista completa'; }
+    return;
   }
   if(state.editing && ['eDate','eH','eM','eNote'].includes(id)){ const f={eDate:'date',eH:'h',eM:'m',eNote:'note'}[id]; state.editing[f]=e.target.value; return; }
   if(id==='fName'){ state.profile.name=e.target.value.slice(0,60); state.profile.configured = state.profile.configured || !!state.profile.name; $('#hello').textContent = state.profile.name?`Olá, ${state.profile.name}`:'Ministério de campo'; if(!state.profile.photo){ const a=$('#bigAvatar'); if(a) a.textContent=initials(); $('#topAvatar').textContent=initials(); } persistProfileSoon(); }

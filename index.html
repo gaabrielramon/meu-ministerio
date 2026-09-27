@@ -1,0 +1,806 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#F3F5F0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Ministério">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<script>window.__PWA__ = true; window.__APP_VERSION__ = 2;</script>
+<title>Meu Ministério</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Source+Sans+3:wght@400;600;700&family=DM+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --ground:#F3F5F0; --surface:#FFFFFF; --sunk:#E9EDE6; --line:#D7DDD3;
+  --ink:#1C2420; --muted:#5F6B64; --accent:#2F6B4F; --accent-ink:#FFFFFF;
+  --accent-soft:#DCEBE1; --amber:#A8661A; --amber-soft:#F6E8D3; --danger:#B3403A; --danger-soft:#F6DEDB;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --mono:"DM Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --ground:#111513; --surface:#19201C; --sunk:#222A25; --line:#2E3832;
+    --ink:#E7ECE8; --muted:#9BA69F; --accent:#6DBE8F; --accent-ink:#0E1511;
+    --accent-soft:#223A2D; --amber:#E0A458; --amber-soft:#3A2D1B; --danger:#E0827B; --danger-soft:#3D2220;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ground:#111513; --surface:#19201C; --sunk:#222A25; --line:#2E3832;
+  --ink:#E7ECE8; --muted:#9BA69F; --accent:#6DBE8F; --accent-ink:#0E1511;
+  --accent-soft:#223A2D; --amber:#E0A458; --amber-soft:#3A2D1B; --danger:#E0827B; --danger-soft:#3D2220;
+}
+*{box-sizing:border-box}
+html,body{background:var(--ground)}
+body{color:var(--ink);font:16px/1.5 var(--body);padding-inline:16px;padding-block:0 calc(88px + env(safe-area-inset-bottom,0px))}
+.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+header.top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding-top:20px}
+h1{font:700 1.6rem/1.1 var(--display);letter-spacing:-.01em;margin:0}
+h2{font:700 1.15rem/1.2 var(--display);margin:0;text-wrap:balance}
+.eyebrow{font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:.8rem;font-weight:600;background:var(--accent-soft);color:var(--accent);padding:4px 10px;border-radius:999px;white-space:nowrap}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:14px}
+.muted{color:var(--muted)}
+.small{font-size:.875rem}
+.num{font-variant-numeric:tabular-nums}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:10px 16px;font-weight:600}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.ghost{background:transparent}
+.btn.danger{color:var(--danger);border-color:var(--danger-soft);background:var(--danger-soft)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.row.between{justify-content:space-between}
+
+/* Timer */
+.timer{align-items:center;text-align:center;padding-block:26px}
+.clock{font:500 clamp(2.8rem,14vw,4.2rem)/1 var(--mono);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.clock.running{color:var(--accent)}
+.status{font-size:.9rem;color:var(--muted);min-height:1.4em}
+.timer .row{justify-content:center}
+.timer .row{width:100%;flex-wrap:nowrap}
+.timer .btn{flex:1;max-width:200px;padding:12px 14px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--accent);display:inline-block;animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){.dot{animation:none}}
+
+/* Progress */
+.big{font:700 2.2rem/1 var(--display);font-variant-numeric:tabular-nums}
+.big small{font:600 1rem var(--body);color:var(--muted);margin-left:4px}
+.bar{height:12px;background:var(--sunk);border-radius:999px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:999px;transition:width .4s}
+.bar.done i{background:var(--accent)}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.fact{background:var(--sunk);border-radius:10px;padding:10px}
+.fact b{display:block;font:700 1.05rem var(--display);font-variant-numeric:tabular-nums}
+.fact span{font-size:.75rem;color:var(--muted)}
+@media (max-width:380px){.facts{grid-template-columns:1fr 1fr}}
+
+/* Forms */
+label.f{display:flex;flex-direction:column;gap:6px;font-size:.85rem;font-weight:600;color:var(--muted)}
+input[type=text],input[type=number],input[type=date],select{background:var(--ground);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%;min-width:0;font-size:1rem;color:var(--ink)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:12px}
+@media (max-width:420px){.grid3{grid-template-columns:1fr 1fr}.grid3 .span{grid-column:1/-1}}
+.seg{display:flex;background:var(--sunk);border-radius:10px;padding:4px;gap:4px}
+.seg button{flex:1;border:0;background:transparent;border-radius:8px;padding:8px;font-weight:600;color:var(--muted)}
+.seg button[aria-pressed=true]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.flash{animation:flash 1.4s ease-out}
+@keyframes flash{0%{box-shadow:0 0 0 3px var(--accent)}100%{box-shadow:0 0 0 0 transparent}}
+
+/* Types */
+.types{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.type{border:1.5px solid var(--line);background:var(--surface);border-radius:12px;padding:12px;text-align:left;display:flex;flex-direction:column;gap:2px}
+.type b{font:700 1rem var(--display)}
+.type span{font-size:.8rem;color:var(--muted)}
+.type[aria-pressed=true]{border-color:var(--accent);background:var(--accent-soft)}
+@media (max-width:360px){.types{grid-template-columns:1fr}}
+
+/* Month nav */
+.mnav{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.mnav h2::first-letter{text-transform:uppercase}
+#app{display:flex;flex-direction:column;gap:16px}
+.iconbtn{width:40px;height:40px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-size:1.2rem;line-height:1;display:grid;place-items:center}
+
+/* Entries */
+.entries{display:flex;flex-direction:column}
+.entry{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+.entry:first-child{border-top:0}
+.day{width:64px;text-align:center;background:var(--sunk);border-radius:10px;padding:6px 0;line-height:1.1}
+.day b{display:block;font:700 1.15rem var(--display)}
+.day span{font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.entry .dur{font:600 1rem var(--mono);font-variant-numeric:tabular-nums}
+.entry .note{font-size:.85rem;color:var(--muted);overflow-wrap:anywhere}
+.tag{font-size:.7rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--amber);background:var(--amber-soft);padding:2px 6px;border-radius:6px;margin-left:6px}
+.del{border:0;background:transparent;color:var(--muted);padding:6px 8px;border-radius:8px;font-size:.85rem}
+.del.armed{background:var(--danger-soft);color:var(--danger);font-weight:600}
+.empty{padding:18px;text-align:center;color:var(--muted);background:var(--sunk);border-radius:10px;font-size:.95rem}
+
+/* Calendar */
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal .wd{font-size:.7rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);text-align:center;padding-bottom:2px}
+.cal .d{border:1px solid transparent;background:var(--sunk);border-radius:8px;min-height:52px;padding:4px 2px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:2px;font-variant-numeric:tabular-nums;min-width:0}
+.cal .d b{font:600 .9rem var(--body)}
+.cal .d span{font:500 .68rem var(--mono);color:var(--accent);white-space:nowrap}
+.cal .d.has{background:var(--accent-soft)}
+.cal .d.today{border-color:var(--accent)}
+.cal .d.sel{background:var(--accent);color:var(--accent-ink)}
+.cal .d.sel span{color:var(--accent-ink)}
+.cal .d.future{opacity:.45}
+.cal .pad{min-height:52px}
+.daydetail{background:var(--sunk);border-radius:10px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.daydetail b{font:700 1rem var(--display)}
+.stepper{display:flex;align-items:center;gap:10px}
+.stepper output{font:700 1.4rem var(--display);min-width:2ch;text-align:center;font-variant-numeric:tabular-nums}
+.switch{display:flex;align-items:center;gap:10px;cursor:pointer}
+.switch input{width:20px;height:20px;accent-color:var(--accent)}
+
+/* Report slip */
+.slip{background:var(--ground);border:1px dashed var(--line);border-radius:10px;padding:14px;font:400 .92rem/1.6 var(--mono);white-space:pre-wrap;overflow-wrap:anywhere}
+
+/* Year chart */
+.chart{display:grid;grid-template-columns:repeat(12,1fr);gap:6px;align-items:end;height:170px;position:relative;padding-top:8px}
+.chart .col{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:4px;min-width:0}
+.chart .b{width:100%;max-width:28px;background:var(--accent);border-radius:6px 6px 2px 2px;min-height:2px}
+.chart .b.under{background:var(--amber)}
+.chart .b.zero{background:var(--line)}
+.chart .b.future{background:var(--sunk)}
+.chart .lbl{font-size:.68rem;color:var(--muted);text-transform:uppercase}
+.chart .val{font-size:.66rem;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.goal-line{position:absolute;left:0;right:0;border-top:1.5px dashed var(--muted);opacity:.6;pointer-events:none}
+.goal-line span{position:absolute;right:0;top:-18px;font-size:.68rem;color:var(--muted);background:var(--surface);padding:0 4px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+
+/* Avatar */
+.avatar{width:44px;height:44px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font:700 1rem var(--display);overflow:hidden;flex:none;border:2px solid var(--surface);box-shadow:0 0 0 1px var(--line)}
+.avatar img{width:100%;height:100%;object-fit:cover;display:block}
+.avatar.lgish{width:52px;height:52px;font-size:1.15rem}
+.avatar.lg{width:96px;height:96px;font-size:2rem}
+.photo-row{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.photo-row .row{gap:8px}
+.filebtn{position:relative;overflow:hidden}
+.filebtn input{position:absolute;inset:0;opacity:0;cursor:pointer;font-size:0}
+.topright{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+/* Theme picker */
+.swatches{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.sw{border:1.5px solid var(--line);background:var(--surface);border-radius:12px;padding:10px 6px;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:.78rem;font-weight:600;color:var(--muted);position:relative;overflow:hidden}
+.sw i{width:30px;height:30px;border-radius:50%;display:block;box-shadow:inset 0 0 0 2px rgba(255,255,255,.35)}
+.sw[aria-pressed=true]{border-color:var(--accent);color:var(--ink);background:var(--accent-soft)}
+.sw input[type=color]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;border:0;padding:0}
+.banner{background:var(--amber-soft);color:var(--ink);border-radius:12px;padding:14px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+
+/* Bottom nav */
+nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);padding:8px 12px calc(8px + env(safe-area-inset-bottom,0px));display:flex;justify-content:center;z-index:10}
+nav.tabs .in{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;width:100%;max-width:560px}
+nav.tabs button{border:0;background:transparent;border-radius:10px;padding:8px 4px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:.78rem;font-weight:600;color:var(--muted)}
+nav.tabs button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+nav.tabs button[aria-current=page]{color:var(--accent);background:var(--accent-soft)}
+
+.toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--ground);padding:10px 16px;border-radius:10px;font-weight:600;font-size:.9rem;z-index:20;max-width:calc(100% - 32px);text-align:center}
+.sync{font-size:.75rem;color:var(--muted)}
+</style>
+<style>
+:root{padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+img{max-width:100%}
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="eyebrow" id="hello">Ministério de campo</div>
+      <h1>Meu Ministério</h1>
+      <span class="chip" id="typeChip" style="margin-top:8px">Pioneiro auxiliar</span>
+    </div>
+    <button class="avatar lgish" id="topAvatar" data-go="ajustes" aria-label="Abrir perfil"></button>
+  </header>
+  <main id="app"></main>
+  <p class="sync" id="sync">Carregando seus dados…</p>
+</div>
+
+<nav class="tabs" aria-label="Seções">
+  <div class="in">
+    <button data-tab="contador"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg>Contador</button>
+    <button data-tab="mes"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Mês</button>
+    <button data-tab="ano"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Ano</button>
+    <button data-tab="ajustes"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>Perfil</button>
+  </div>
+</nav>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function(){
+'use strict';
+
+const TYPES = {
+  publicador:{label:'Publicador', desc:'Relata participação e estudos', month:0, year:0},
+  auxiliar:{label:'Pioneiro auxiliar', desc:'30 ou 15 horas por mês', month:30, year:0},
+  regular:{label:'Pioneiro regular', desc:'Meta mensal e anual', month:50, year:600},
+  especial:{label:'Pioneiro especial', desc:'Meta mensal de horas', month:130, year:0},
+};
+const IS_PWA = !!window.__PWA__;
+const MONTHS_SHORT = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+const WEEK = ['dom','seg','ter','qua','qui','sex','sáb'];
+const WEEK_FULL = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
+
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad = n => String(n).padStart(2,'0');
+const todayISO = () => { const d=new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; };
+const monthKeyOf = iso => iso.slice(0,7);
+const curMonthKey = () => monthKeyOf(todayISO());
+const addMonths = (key, n) => { let [y,m]=key.split('-').map(Number); m+=n; while(m>12){m-=12;y++} while(m<1){m+=12;y--} return `${y}-${pad(m)}`; };
+const monthName = key => { const [y,m]=key.split('-').map(Number); return new Date(y,m-1,1).toLocaleDateString('pt-BR',{month:'long',year:'numeric'}); };
+const serviceYearStart = key => { const [y,m]=key.split('-').map(Number); return m>=9 ? y : y-1; };
+const fmtHM = min => { min=Math.max(0,Math.round(min)); const h=Math.floor(min/60), m=min%60; return m ? `${h}h${pad(m)}` : `${h}h`; };
+const fmtClock = ms => { const s=Math.floor(ms/1000); return `${pad(Math.floor(s/3600))}:${pad(Math.floor(s/60)%60)}:${pad(s%60)}`; };
+const uid = () => Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const clone = o => JSON.parse(JSON.stringify(o));
+
+let toastT;
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>t.hidden=true,2600); }
+
+/* ---------- state ---------- */
+const defaultProfile = () => ({ name:'', photo:'', accent:'', mode:'auto', type:'auxiliar', goalMonth:30, goalYear:0, configured:false,
+  timer:{ running:false, startedAt:null, accumMs:0 } });
+const emptyMonth = () => ({ entries:[], studies:0, participated:null });
+
+const state = {
+  profile: defaultProfile(),
+  months: {},
+  tab: 'contador',
+  cursor: curMonthKey(),
+  yearStart: serviceYearStart(curMonthKey()),
+  draft: { date: todayISO(), h:'', m:'', kind:'campo', note:'' },
+  armed: null,
+  selDay: null,
+  pendingImport: null,
+};
+const month = key => state.months[key] || emptyMonth();
+
+/* ---------- storage: db per viewer, local fallback ---------- */
+const LS = 'meu-ministerio-v1';
+const local = {
+  read(){ try{ return JSON.parse(localStorage.getItem(LS)||'null'); }catch(e){ return null; } },
+  write(){ try{ localStorage.setItem(LS, JSON.stringify({profile:state.profile, months:state.months})); }catch(e){} },
+};
+let remote = null;      // { profileRef, monthsCol }
+const chains = {};
+function enqueue(key, fn){
+  chains[key] = (chains[key]||Promise.resolve()).then(fn).catch(e=>{ console.warn(e); toast('Não foi possível salvar agora. Tente de novo.'); });
+  return chains[key];
+}
+function persistProfile(){
+  local.write();
+  if(remote) enqueue('profile', ()=>remote.profileRef.set(clone(state.profile)));
+}
+let profileTimer=null, profileDirty=false;
+function persistProfileSoon(){
+  profileDirty=true; clearTimeout(profileTimer);
+  profileTimer=setTimeout(()=>{ profileDirty=false; persistProfile(); }, 600);
+}
+function persistMonth(key){
+  local.write();
+  if(remote) enqueue('m'+key, ()=>remote.monthsCol.doc(key).set(clone(state.months[key])));
+}
+
+(function loadLocal(){
+  const d = local.read();
+  if(d){ state.profile = Object.assign(defaultProfile(), d.profile||{}); state.months = d.months||{}; }
+})();
+
+async function connect(){
+  const sync = $('#sync');
+  if(!window.claude || !window.claude.use){ sync.textContent='Dados salvos neste aparelho.'; return; }
+  try{
+    const [db, user] = await Promise.all([window.claude.use('db'), window.claude.use('user')]);
+    const id = user ? await user.id() : null;
+    if(!db || !id){ sync.textContent='Dados salvos neste aparelho.'; return; }
+    const profileRef = db.doc(`data/users/${id}/profile`);
+    const monthsCol = profileRef.collection('months');
+    remote = { profileRef, monthsCol };
+    const hadLocal = !!local.read();
+    const [pSnap, mSnap] = await Promise.all([profileRef.get(), monthsCol.get()]);
+    if(!pSnap.exists && hadLocal && state.profile.configured){ await profileRef.set(clone(state.profile)); }
+    if(mSnap.empty && Object.keys(state.months).length){
+      for(const k of Object.keys(state.months)) await monthsCol.doc(k).set(clone(state.months[k]));
+    }
+    profileRef.onSnapshot(s=>{
+      if(!s.exists || profileDirty) return;
+      state.profile = Object.assign(defaultProfile(), clone(s.data()));
+      local.write(); render();
+    }, ()=>{});
+    monthsCol.onSnapshot(s=>{
+      const next={}; s.docs.forEach(d=>{ next[d.id]=Object.assign(emptyMonth(), clone(d.data())); });
+      state.months = next; local.write(); render();
+    }, ()=>{});
+    sync.textContent='Sincronizado na sua conta. Só você vê seus dados.';
+  }catch(e){
+    console.warn(e); remote=null; sync.textContent='Dados salvos neste aparelho.';
+  }
+}
+
+/* ---------- calculations ---------- */
+function totals(key){
+  const m = month(key); let field=0, credit=0;
+  m.entries.forEach(e=>{ if(e.kind==='credito') credit+=e.min; else field+=e.min; });
+  return { field, credit, all: field+credit };
+}
+function goalMonthMin(){ return (Number(state.profile.goalMonth)||0)*60; }
+function timerMs(){ const t=state.profile.timer; return t.accumMs + (t.running && t.startedAt ? Date.now()-t.startedAt : 0); }
+function participated(key){ const m=month(key); return m.participated===null || m.participated===undefined ? m.entries.length>0 : !!m.participated; }
+
+/* ---------- views ---------- */
+function progressBlock(key, compact){
+  const t = totals(key), goal = goalMonthMin(), type = state.profile.type;
+  const hasGoal = goal>0 && type!=='publicador';
+  const pct = hasGoal ? Math.min(100, t.all/goal*100) : 0;
+  let facts = '';
+  if(hasGoal){
+    const left = Math.max(0, goal - t.all);
+    let paceTxt = '—', daysTxt='—';
+    const cur = curMonthKey();
+    if(key===cur){
+      const d=new Date(); const last=new Date(d.getFullYear(), d.getMonth()+1, 0).getDate();
+      const daysLeft = last - d.getDate() + 1; daysTxt = String(daysLeft);
+      paceTxt = left ? fmtHM(left/daysLeft) : 'ok';
+    } else if(key<cur){ daysTxt='0'; paceTxt = left ? 'encerrado':'ok'; }
+    facts = `<div class="facts">
+      <div class="fact"><b>${left? fmtHM(left):'Meta!'}</b><span>${left?'faltam':'alcançada'}</span></div>
+      <div class="fact"><b>${daysTxt}</b><span>dias restantes</span></div>
+      <div class="fact"><b>${paceTxt}</b><span>por dia p/ meta</span></div>
+    </div>`;
+  }
+  return `
+    <div class="row between">
+      <div>
+        <div class="eyebrow">${compact ? esc(monthName(key)) : 'Horas no mês'}</div>
+        <div class="big">${fmtHM(t.all)}${hasGoal?`<small>de ${state.profile.goalMonth}h</small>`:''}</div>
+      </div>
+      ${t.credit ? `<span class="small muted num">${fmtHM(t.field)} campo · ${fmtHM(t.credit)} crédito</span>`:''}
+    </div>
+    ${hasGoal ? `<div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(pct)}"><i style="width:${pct}%"></i></div>` : `<p class="small muted" style="margin:0">Publicadores relatam só a participação e os estudos. As horas aqui ficam para seu controle.</p>`}
+    ${facts}`;
+}
+
+function viewContador(){
+  const t = state.profile.timer, ms = timerMs(), running=t.running, has=ms>0;
+  const d = state.draft;
+  return `
+  ${!state.profile.configured ? `<div class="banner"><span>Primeiro, diga que tipo de publicador você é para ajustar a meta.</span><button class="btn primary" data-go="ajustes">Configurar</button></div>`:''}
+  <section class="card timer" aria-label="Cronômetro">
+    <div class="eyebrow">Cronômetro</div>
+    <div class="clock ${running?'running':''}" id="clock">${fmtClock(ms)}</div>
+    <div class="status" id="tstatus">${running?'<span class="dot"></span> Contando tempo de pregação': has?'Pausado':'Aperte iniciar quando sair para pregar'}</div>
+    <div class="row">
+      ${running ? `<button class="btn" data-act="pause">Pausar</button>` : `<button class="btn primary" data-act="start">${has?'Continuar':'Iniciar'}</button>`}
+      <button class="btn" data-act="finish" ${has?'':'disabled'}>Encerrar e lançar</button>
+    </div>
+    ${has && !running ? `<button class="del" data-act="discard">Descartar cronômetro</button>`:''}
+  </section>
+
+  <section class="card">${progressBlock(curMonthKey(), true)}</section>
+
+  <section class="card" id="entryCard" aria-label="Lançar tempo">
+    <h2>Lançar tempo</h2>
+    <div class="seg" role="group" aria-label="Tipo de hora">
+      <button data-kind="campo" aria-pressed="${d.kind==='campo'}">Ministério</button>
+      <button data-kind="credito" aria-pressed="${d.kind==='credito'}">Horas de crédito</button>
+    </div>
+    <div class="grid3">
+      <label class="f span">Data<input type="date" id="fDate" value="${esc(d.date)}"></label>
+      <label class="f">Horas<input type="number" id="fH" min="0" max="24" inputmode="numeric" placeholder="0" value="${esc(d.h)}"></label>
+      <label class="f">Minutos<input type="number" id="fM" min="0" max="59" step="5" inputmode="numeric" placeholder="0" value="${esc(d.m)}"></label>
+    </div>
+    <label class="f">Anotação (opcional)<input type="text" id="fNote" maxlength="140" placeholder="Ex.: casa em casa, testemunho público, revisita" value="${esc(d.note)}"></label>
+    <button class="btn primary" data-act="add">Salvar lançamento</button>
+  </section>`;
+}
+
+function viewMes(){
+  const key = state.cursor, m = month(key), t=totals(key);
+  const cur = curMonthKey();
+  const entries = m.entries.slice().sort((a,b)=> b.date.localeCompare(a.date) || (b.at||0)-(a.at||0));
+  const list = entries.length ? entries.map(e=>{
+    const dt = new Date(e.date+'T12:00:00');
+    const armed = state.armed===e.id;
+    return `<div class="entry">
+      <div class="day"><b>${dt.getDate()}</b><span>${WEEK_FULL[dt.getDay()].replace('-feira','')}</span></div>
+      <div><span class="dur">${fmtHM(e.min)}</span>${e.kind==='credito'?'<span class="tag">crédito</span>':''}${e.note?`<div class="note">${esc(e.note)}</div>`:''}</div>
+      <button class="del ${armed?'armed':''}" data-del="${esc(e.id)}">${armed?'Apagar?':'Remover'}</button>
+    </div>`;
+  }).join('') : `<div class="empty">Nenhum lançamento em ${esc(monthName(key))}.</div>`;
+
+  return `
+  <div class="mnav">
+    <button class="iconbtn" data-month="-1" aria-label="Mês anterior">‹</button>
+    <h2>${esc(monthName(key))}</h2>
+    <button class="iconbtn" data-month="1" aria-label="Próximo mês" ${key>=cur?'disabled':''}>›</button>
+  </div>
+  <section class="card">${progressBlock(key,false)}</section>
+
+  <section class="card" aria-label="Calendário do mês">
+    <h2>Calendário</h2>
+    ${calendar(key)}
+  </section>
+
+  <section class="card">
+    <div class="row between">
+      <div><h2>Estudos bíblicos</h2><span class="small muted">Quantos estudos diferentes você dirigiu no mês</span></div>
+      <div class="stepper">
+        <button class="iconbtn" data-studies="-1" aria-label="Menos um estudo">−</button>
+        <output class="num">${m.studies||0}</output>
+        <button class="iconbtn" data-studies="1" aria-label="Mais um estudo">+</button>
+      </div>
+    </div>
+    <label class="switch"><input type="checkbox" id="fPart" ${participated(key)?'checked':''}> Participei no ministério neste mês</label>
+  </section>
+
+  <section class="card">
+    <h2>Relatório do mês</h2>
+    <div class="slip" id="slip">${esc(reportText(key))}</div>
+    <div class="row"><button class="btn primary" data-act="copy">Copiar relatório</button></div>
+  </section>
+
+  <section class="card">
+    <div class="row between"><h2>Lançamentos</h2><span class="small muted num">${entries.length} ${entries.length===1?'registro':'registros'}</span></div>
+    <div class="entries">${list}</div>
+  </section>`;
+}
+
+function calendar(key){
+  const [y,mo]=key.split('-').map(Number);
+  const first=new Date(y,mo-1,1).getDay(), last=new Date(y,mo,0).getDate();
+  const byDay={}; month(key).entries.forEach(e=>{ byDay[e.date]=(byDay[e.date]||0)+e.min; });
+  const today=todayISO();
+  let cells=WEEK.map(w=>`<div class="wd">${w}</div>`).join('');
+  for(let i=0;i<first;i++) cells+='<div class="pad"></div>';
+  for(let d=1; d<=last; d++){
+    const iso=`${key}-${pad(d)}`, min=byDay[iso]||0;
+    const cls=['d', min?'has':'', iso===today?'today':'', iso===state.selDay?'sel':'', iso>today?'future':''].join(' ');
+    const wd=WEEK_FULL[new Date(y,mo-1,d).getDay()];
+    cells+=`<button class="${cls}" data-day="${iso}" aria-label="${wd}, ${d}: ${min?fmtHM(min):'sem tempo'}"><b>${d}</b>${min?`<span>${fmtHM(min)}</span>`:''}</button>`;
+  }
+  let detail='';
+  if(state.selDay && monthKeyOf(state.selDay)===key){
+    const dt=new Date(state.selDay+'T12:00:00'), min=byDay[state.selDay]||0;
+    const n=month(key).entries.filter(e=>e.date===state.selDay).length;
+    detail=`<div class="daydetail"><div><b>${WEEK_FULL[dt.getDay()]}, ${dt.getDate()} de ${dt.toLocaleDateString('pt-BR',{month:'long'})}</b><div class="small muted">${min?`${fmtHM(min)} em ${n} ${n===1?'lançamento':'lançamentos'}`:'Nenhum tempo lançado'}</div></div>${state.selDay<=today?`<button class="btn" data-act="addday">Lançar neste dia</button>`:''}</div>`;
+  } else {
+    detail='<p class="small muted" style="margin:0">Toque em um dia para ver o tempo e o dia da semana.</p>';
+  }
+  return `<div class="cal">${cells}</div>${detail}`;
+}
+
+function reportText(key){
+  const p = state.profile, m = month(key), t = totals(key);
+  const lines = [`Relatório de serviço de campo — ${monthName(key)}`];
+  if(p.name) lines.push(`Nome: ${p.name}`);
+  lines.push(`Participei no ministério: ${participated(key)?'Sim':'Não'}`);
+  lines.push(`Estudos bíblicos: ${m.studies||0}`);
+  if(p.type!=='publicador'){
+    lines.push(`Horas: ${Math.floor(t.field/60)}${t.field%60?`  (total ${fmtHM(t.field)})`:''}`);
+    if(t.credit) lines.push(`Horas de crédito: ${Math.floor(t.credit/60)}${t.credit%60?`  (total ${fmtHM(t.credit)})`:''}`);
+    lines.push(`Observações: ${TYPES[p.type].label}`);
+  }
+  return lines.join('\n');
+}
+
+function viewAno(){
+  const y = state.yearStart, cur = curMonthKey();
+  const keys = Array.from({length:12},(_,i)=> addMonths(`${y}-09`, i));
+  const vals = keys.map(k=>totals(k).all);
+  const goal = state.profile.type==='publicador' ? 0 : goalMonthMin();
+  const max = Math.max(goal, ...vals, 60);
+  const sum = vals.reduce((a,b)=>a+b,0);
+  const studiesAvg = (()=>{ const past=keys.filter(k=>k<=cur && state.months[k]); if(!past.length) return 0; return past.reduce((a,k)=>a+(month(k).studies||0),0)/past.length; })();
+  const goalYear = Number(state.profile.goalYear)||0;
+  const hasYearGoal = goalYear>0 && state.profile.type!=='publicador';
+  const yPct = hasYearGoal ? Math.min(100, sum/(goalYear*60)*100) : 0;
+  const reached = keys.filter(k=>goal && totals(k).all>=goal).length;
+  const CH = 130; // bar area px
+  const cols = keys.map((k,i)=>{
+    const v=vals[i], future = k>cur;
+    const h = future ? 6 : Math.max(2, v/max*CH);
+    const cls = future ? 'future' : v===0 ? 'zero' : (goal && v<goal && k<cur) ? 'under' : '';
+    const mi = Number(k.slice(5))-1;
+    return `<div class="col" title="${esc(monthName(k))}: ${fmtHM(v)}"><span class="val">${future?'':fmtHM(v)}</span><div class="b ${cls}" style="height:${h}px"></div><span class="lbl">${MONTHS_SHORT[mi]}</span></div>`;
+  }).join('');
+  const goalLine = goal ? `<div class="goal-line" style="bottom:${goal/max*CH + 22}px"><span>meta ${state.profile.goalMonth}h</span></div>` : '';
+  return `
+  <div class="mnav">
+    <button class="iconbtn" data-year="-1" aria-label="Ano de serviço anterior">‹</button>
+    <div style="text-align:center"><div class="eyebrow">Ano de serviço</div><h2>set/${y} – ago/${y+1}</h2></div>
+    <button class="iconbtn" data-year="1" aria-label="Próximo ano de serviço" ${y>=serviceYearStart(cur)?'disabled':''}>›</button>
+  </div>
+  <section class="card">
+    <div class="row between">
+      <div><div class="eyebrow">Total no ano</div><div class="big">${fmtHM(sum)}${hasYearGoal?`<small>de ${goalYear}h</small>`:''}</div></div>
+    </div>
+    ${hasYearGoal?`<div class="bar"><i style="width:${yPct}%"></i></div>`:''}
+    <div class="facts">
+      <div class="fact"><b>${hasYearGoal? fmtHM(Math.max(0,goalYear*60-sum)) : fmtHM(sum/Math.max(1,keys.filter(k=>k<=cur).length))}</b><span>${hasYearGoal?'faltam no ano':'média por mês'}</span></div>
+      <div class="fact"><b>${goal?reached:'—'}</b><span>meses com meta</span></div>
+      <div class="fact"><b>${studiesAvg.toFixed(1).replace('.',',')}</b><span>estudos/mês (média)</span></div>
+    </div>
+  </section>
+  <section class="card">
+    <h2>Horas por mês</h2>
+    <div style="overflow-x:auto"><div class="chart">${goalLine}${cols}</div></div>
+    ${goal?`<div class="legend"><span><i style="background:var(--accent)"></i>meta alcançada ou mês atual</span><span><i style="background:var(--amber)"></i>abaixo da meta</span></div>`:''}
+  </section>`;
+}
+
+function viewAjustes(){
+  const p = state.profile;
+  const typeBtns = Object.entries(TYPES).map(([k,v])=>`<button class="type" data-type="${k}" aria-pressed="${p.type===k}"><b>${v.label}</b><span>${v.desc}</span></button>`).join('');
+  return `
+  <section class="card">
+    <h2>Seu perfil</h2>
+    <div class="photo-row">
+      <div class="avatar lg" id="bigAvatar">${avatarInner()}</div>
+      <div class="row">
+        <label class="btn filebtn" for="fPhoto">${p.photo?'Trocar foto':'Escolher foto'}<input type="file" id="fPhoto" accept="image/*" aria-label="Escolher foto de perfil"></label>
+        ${p.photo?'<button class="btn ghost" data-act="rmphoto">Remover</button>':''}
+      </div>
+    </div>
+    <label class="f">Seu nome (aparece no relatório)<input type="text" id="fName" maxlength="60" placeholder="Ex.: Ramon" value="${esc(p.name)}"></label>
+  </section>
+  <section class="card" aria-label="Aparência">
+    <div><h2>Cores do app</h2><span class="small muted">Escolha a cor de destaque e se o app fica claro ou escuro.</span></div>
+    <div class="swatches">
+      ${PRESETS.map(c=>`<button class="sw" data-accent="${c.hex}" aria-pressed="${(p.accent||DEFAULT_ACCENT).toUpperCase()===c.hex}"><i style="background:${c.hex}"></i>${c.name}${c.hex===DEFAULT_ACCENT?' (padrão)':''}</button>`).join('')}
+      <label class="sw" aria-pressed="${!!p.accent && !PRESETS.some(c=>c.hex===(p.accent||'').toUpperCase())}"><i style="background:${p.accent && !PRESETS.some(c=>c.hex===(p.accent||'').toUpperCase()) ? esc(p.accent) : 'conic-gradient(#e0533d,#e0b43d,#5bbf6a,#3d8fe0,#9b5de0,#e0533d)'}"></i>Outra cor<input type="color" id="fAccent" value="${esc(p.accent||DEFAULT_ACCENT)}" aria-label="Escolher outra cor"></label>
+    </div>
+    <div class="seg" role="group" aria-label="Modo claro ou escuro">
+      <button data-mode="auto" aria-pressed="${(p.mode||'auto')==='auto'}">Automático</button>
+      <button data-mode="light" aria-pressed="${p.mode==='light'}">Claro</button>
+      <button data-mode="dark" aria-pressed="${p.mode==='dark'}">Escuro</button>
+    </div>
+    <span class="small muted">Automático segue o modo claro ou escuro do seu celular.</span>
+  </section>
+  <section class="card">
+    <div><h2>Que tipo de publicador você é?</h2><span class="small muted">Você pode mudar quando quiser, por exemplo ao servir como auxiliar só em alguns meses.</span></div>
+    <div class="types">${typeBtns}</div>
+    ${p.type==='auxiliar' ? `
+    <div><div class="f" style="margin-bottom:6px">Meta do pioneiro auxiliar</div>
+    <div class="seg" role="group" aria-label="Meta do pioneiro auxiliar">
+      <button data-aux="30" aria-pressed="${Number(p.goalMonth)===30}">30 horas</button>
+      <button data-aux="15" aria-pressed="${Number(p.goalMonth)===15}">15 horas</button>
+    </div></div>` : ''}
+    ${p.type!=='publicador' ? `
+    <div class="grid2">
+      <label class="f">Meta mensal (horas)<input type="number" id="fGoalM" min="0" max="300" inputmode="numeric" value="${esc(p.goalMonth)}"></label>
+      <label class="f">Meta anual (horas)<input type="number" id="fGoalY" min="0" max="2000" inputmode="numeric" placeholder="opcional" value="${p.goalYear?esc(p.goalYear):''}"></label>
+    </div>
+    <p class="small muted" style="margin:0">As metas vêm preenchidas com um valor padrão para cada tipo. Ajuste se a sua for diferente.</p>` : ''}
+  </section>
+  ${IS_PWA ? `<section class="card">
+    <h2>Backup</h2>
+    <p class="small muted" style="margin:0">Seus dados ficam guardados só neste celular. Salve um backup de vez em quando, principalmente antes de trocar de aparelho ou limpar os dados do navegador.</p>
+    <div class="row">
+      <button class="btn primary" data-act="export">Salvar backup</button>
+      <label class="btn filebtn" for="fImport">Restaurar backup<input type="file" id="fImport" accept="application/json,.json" aria-label="Restaurar backup"></label>
+    </div>
+    ${state.pendingImport ? `<div class="daydetail"><div><b>Substituir tudo pelo backup?</b><div class="small muted">${state.pendingImport.count} meses com lançamentos. Os dados atuais serão trocados.</div></div><div class="row"><button class="btn ghost" data-act="cancelimport">Cancelar</button><button class="btn danger" data-act="doimport">Substituir</button></div></div>`:''}
+  </section>` : `<section class="card">
+    <h2>Sobre seus dados</h2>
+    <p class="small muted" style="margin:0">Cada pessoa que abre este app tem os próprios registros. Se você compartilhar o link com alguém da congregação, essa pessoa começa do zero e não vê os seus lançamentos.</p>
+  </section>`}`;
+}
+
+function initials(){ const n=(state.profile.name||'').trim().split(/\s+/).filter(Boolean); return n.length ? (n[0][0]+(n.length>1?n[n.length-1][0]:'')).toUpperCase() : '?'; }
+function avatarInner(){ return state.profile.photo ? `<img src="${esc(state.profile.photo)}" alt="Sua foto">` : esc(initials()); }
+function resizePhoto(file){
+  return new Promise((resolve,reject)=>{
+    const url=URL.createObjectURL(file); const img=new Image();
+    img.onload=()=>{
+      const S=256, side=Math.min(img.naturalWidth,img.naturalHeight);
+      const c=document.createElement('canvas'); c.width=S; c.height=S;
+      c.getContext('2d').drawImage(img,(img.naturalWidth-side)/2,(img.naturalHeight-side)/2,side,side,0,0,S,S);
+      URL.revokeObjectURL(url); resolve(c.toDataURL('image/jpeg',0.82));
+    };
+    img.onerror=()=>{ URL.revokeObjectURL(url); reject(new Error('img')); };
+    img.src=url;
+  });
+}
+
+/* ---------- theme ---------- */
+const PRESETS = [
+  {name:'Verde', hex:'#2F6B4F'}, {name:'Azul', hex:'#2A5C9A'}, {name:'Petróleo', hex:'#1F6F78'}, {name:'Roxo', hex:'#6A4C9C'},
+  {name:'Vinho', hex:'#8E3B4F'}, {name:'Laranja', hex:'#B4561E'}, {name:'Grafite', hex:'#4A5560'},
+];
+const DEFAULT_ACCENT = '#2F6B4F';
+const HOST_THEME = document.documentElement.getAttribute('data-theme');
+function hexToHsl(hex){
+  const m=/^#?([0-9a-f]{6})$/i.exec(hex||''); if(!m) return null;
+  const n=parseInt(m[1],16); let r=(n>>16&255)/255, g=(n>>8&255)/255, b=(n&255)/255;
+  const mx=Math.max(r,g,b), mn=Math.min(r,g,b); let h=0, s=0, l=(mx+mn)/2;
+  if(mx!==mn){ const d=mx-mn; s=l>.5? d/(2-mx-mn) : d/(mx+mn);
+    h = mx===r ? (g-b)/d+(g<b?6:0) : mx===g ? (b-r)/d+2 : (r-g)/d+4; h*=60; }
+  return {h, s:s*100, l:l*100};
+}
+const hsl=(h,s,l)=>`hsl(${Math.round(h)} ${Math.round(s)}% ${Math.round(l)}%)`;
+function applyTheme(){
+  const p=state.profile;
+  // light/dark mode
+  const root=document.documentElement;
+  if(p.mode==='light' || p.mode==='dark') root.setAttribute('data-theme', p.mode);
+  else if(HOST_THEME) root.setAttribute('data-theme', HOST_THEME); else root.removeAttribute('data-theme');
+  // accent
+  let el=document.getElementById('userTheme');
+  if(!el){ el=document.createElement('style'); el.id='userTheme'; document.head.appendChild(el); }
+  const c=hexToHsl(p.accent);
+  if(!c || (p.accent||'').toUpperCase()===DEFAULT_ACCENT){ el.textContent=''; }
+  else {
+    const L=Math.min(Math.max(c.l,24),42), S=Math.min(c.s,80);
+    const light=`--accent:${hsl(c.h,S,L)};--accent-ink:#FFFFFF;--accent-soft:${hsl(c.h,Math.min(S,45),91)};`;
+    const dark=`--accent:${hsl(c.h,Math.min(S,60),66)};--accent-ink:#0E1511;--accent-soft:${hsl(c.h,Math.min(S,35),19)};`;
+    el.textContent=`:root{${light}}@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){${dark}}}:root[data-theme="dark"]{${dark}}`;
+  }
+  const meta=document.querySelector('meta[name="theme-color"]:not([media])') || document.querySelector('meta[name="theme-color"]');
+  if(meta && window.__PWA__){ document.querySelectorAll('meta[name="theme-color"]').forEach(m=>m.setAttribute('content', getComputedStyle(root).getPropertyValue('--ground').trim() || '#F3F5F0')); }
+}
+
+/* ---------- render ---------- */
+function render(){
+  applyTheme();
+  const app = $('#app');
+  const active = document.activeElement && document.activeElement.id;
+  const views = {contador:viewContador, mes:viewMes, ano:viewAno, ajustes:viewAjustes};
+  app.innerHTML = views[state.tab]();
+  document.querySelectorAll('nav.tabs button').forEach(b=>{ if(b.dataset.tab===state.tab) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current'); });
+  $('#typeChip').textContent = TYPES[state.profile.type].label + (state.profile.type==='auxiliar' ? ` · ${state.profile.goalMonth}h` : '');
+  $('#topAvatar').innerHTML = avatarInner();
+  $('#hello').textContent = state.profile.name ? `Olá, ${state.profile.name}` : 'Ministério de campo';
+  if(active){ const el=document.getElementById(active); if(el && el.tagName==='INPUT' && el.type!=='checkbox'){ el.focus(); try{ const v=el.value; if(el.type==='text'){ el.setSelectionRange(v.length,v.length); } }catch(e){} } }
+}
+
+/* ---------- actions ---------- */
+function setTimer(t){ state.profile.timer = t; persistProfile(); render(); }
+
+document.addEventListener('click', e=>{
+  const b = e.target.closest('button'); if(!b) return;
+  if(b.dataset.tab){ state.tab=b.dataset.tab; state.armed=null; render(); window.scrollTo(0,0); return; }
+  if(b.dataset.go){ state.tab=b.dataset.go; render(); window.scrollTo(0,0); return; }
+  if(b.dataset.kind){ state.draft.kind=b.dataset.kind; render(); return; }
+  if(b.dataset.month){ state.cursor=addMonths(state.cursor, Number(b.dataset.month)); state.armed=null; state.selDay=null; render(); return; }
+  if(b.dataset.year){ state.yearStart+=Number(b.dataset.year); render(); return; }
+  if(b.dataset.type){
+    const k=b.dataset.type; state.profile.type=k; state.profile.goalMonth=TYPES[k].month; state.profile.goalYear=TYPES[k].year; state.profile.configured=true;
+    persistProfile(); render(); return;
+  }
+  if(b.dataset.accent){ state.profile.accent = b.dataset.accent===DEFAULT_ACCENT ? '' : b.dataset.accent; persistProfile(); render(); return; }
+  if(b.dataset.mode){ state.profile.mode=b.dataset.mode; persistProfile(); render(); return; }
+  if(b.dataset.day){ state.selDay = state.selDay===b.dataset.day ? null : b.dataset.day; render(); return; }
+  if(b.dataset.aux){ state.profile.goalMonth=Number(b.dataset.aux); state.profile.configured=true; persistProfile(); render(); return; }
+  if(b.dataset.studies){
+    const key=state.cursor; const m=state.months[key]=Object.assign(emptyMonth(), state.months[key]||{});
+    m.studies=Math.max(0,(m.studies||0)+Number(b.dataset.studies)); persistMonth(key); render(); return;
+  }
+  if(b.dataset.del){
+    const id=b.dataset.del;
+    if(state.armed!==id){ state.armed=id; render(); setTimeout(()=>{ if(state.armed===id){ state.armed=null; render(); } }, 4000); return; }
+    const key=state.cursor; const m=state.months[key]; if(!m) return;
+    m.entries=m.entries.filter(x=>x.id!==id); state.armed=null; persistMonth(key); render(); toast('Lançamento removido'); return;
+  }
+  const act=b.dataset.act; if(!act) return;
+  const t=state.profile.timer;
+  if(act==='start'){ setTimer({ running:true, startedAt:Date.now(), accumMs:t.accumMs||0 }); }
+  else if(act==='pause'){ setTimer({ running:false, startedAt:null, accumMs:timerMs() }); }
+  else if(act==='discard'){ setTimer({ running:false, startedAt:null, accumMs:0 }); toast('Cronômetro zerado'); }
+  else if(act==='finish'){
+    const min = Math.round(timerMs()/60000);
+    state.draft = { date: todayISO(), h: String(Math.floor(min/60)), m: String(min%60), kind:'campo', note: state.draft.note };
+    setTimer({ running:false, startedAt:null, accumMs:0 });
+    const card=$('#entryCard'); if(card){ card.scrollIntoView({behavior:'smooth',block:'center'}); card.classList.add('flash'); }
+    toast('Confira o tempo e toque em Salvar');
+  }
+  else if(act==='add'){
+    readDraft();
+    const min = (parseInt(state.draft.h,10)||0)*60 + (parseInt(state.draft.m,10)||0);
+    if(!state.draft.date){ toast('Escolha a data do lançamento'); return; }
+    if(min<=0){ toast('Informe horas ou minutos'); return; }
+    if(min>24*60){ toast('Um lançamento pode ter no máximo 24 horas'); return; }
+    const key=monthKeyOf(state.draft.date);
+    const m=state.months[key]=Object.assign(emptyMonth(), state.months[key]||{});
+    m.entries=m.entries.concat([{ id:uid(), date:state.draft.date, min, kind:state.draft.kind, note:state.draft.note.trim(), at:Date.now() }]);
+    persistMonth(key);
+    state.draft={ date: todayISO(), h:'', m:'', kind:'campo', note:'' };
+    render(); toast(`${fmtHM(min)} lançadas em ${monthName(key)}`);
+  }
+  else if(act==='addday'){
+    state.draft={ date: state.selDay, h:'', m:'', kind:'campo', note:'' }; state.tab='contador'; render();
+    const card=$('#entryCard'); if(card){ card.scrollIntoView({block:'center'}); card.classList.add('flash'); const h=$('#fH'); if(h) h.focus({preventScroll:true}); }
+  }
+  else if(act==='export'){
+    const data=JSON.stringify({app:'meu-ministerio', version:1, savedAt:new Date().toISOString(), profile:state.profile, months:state.months});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));
+    a.download=`meu-ministerio-backup-${todayISO()}.json`; document.body.appendChild(a); a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 1000); toast('Backup salvo');
+  }
+  else if(act==='cancelimport'){ state.pendingImport=null; render(); }
+  else if(act==='doimport'){
+    const d=state.pendingImport.data; state.profile=Object.assign(defaultProfile(), d.profile||{}); state.months=d.months||{};
+    state.pendingImport=null; local.write(); render(); toast('Backup restaurado');
+  }
+  else if(act==='rmphoto'){ state.profile.photo=''; persistProfile(); render(); toast('Foto removida'); }
+  else if(act==='copy'){
+    const txt=reportText(state.cursor);
+    const done=()=>toast('Relatório copiado');
+    const fallback=()=>{ const r=document.createRange(); r.selectNodeContents($('#slip')); const s=getSelection(); s.removeAllRanges(); s.addRange(r); toast('Texto selecionado. Copie com o menu do aparelho'); };
+    try{ navigator.clipboard.writeText(txt).then(done, fallback); }catch(err){ fallback(); }
+  }
+});
+
+function readDraft(){
+  const g=id=>{ const el=document.getElementById(id); return el?el.value:null; };
+  if(g('fDate')!==null){ state.draft.date=g('fDate'); state.draft.h=g('fH'); state.draft.m=g('fM'); state.draft.note=g('fNote'); }
+}
+document.addEventListener('input', e=>{
+  const id=e.target.id;
+  if(['fDate','fH','fM','fNote'].includes(id)){ readDraft(); return; }
+  if(id==='fName'){ state.profile.name=e.target.value.slice(0,60); state.profile.configured = state.profile.configured || !!state.profile.name; $('#hello').textContent = state.profile.name?`Olá, ${state.profile.name}`:'Ministério de campo'; if(!state.profile.photo){ const a=$('#bigAvatar'); if(a) a.textContent=initials(); $('#topAvatar').textContent=initials(); } persistProfileSoon(); }
+  if(id==='fAccent'){ state.profile.accent=e.target.value.toUpperCase(); applyTheme(); persistProfileSoon(); return; }
+  if(id==='fGoalM'){ state.profile.goalMonth=Math.max(0,Number(e.target.value)||0); state.profile.configured=true; persistProfileSoon(); }
+  if(id==='fGoalY'){ state.profile.goalYear=Math.max(0,Number(e.target.value)||0); persistProfileSoon(); }
+});
+document.addEventListener('change', e=>{
+  if(e.target.id==='fImport'){
+    const f=e.target.files && e.target.files[0]; if(!f) return;
+    f.text().then(t=>{
+      const d=JSON.parse(t); if(!d || d.app!=='meu-ministerio' || typeof d.months!=='object') throw new Error('bad');
+      state.pendingImport={ data:d, count:Object.values(d.months).filter(m=>m && m.entries && m.entries.length).length }; render();
+    }).catch(()=>toast('Esse arquivo não é um backup do Meu Ministério'));
+    return;
+  }
+  if(e.target.id==='fPhoto'){
+    const f=e.target.files && e.target.files[0]; if(!f) return;
+    if(!/^image\//.test(f.type)){ toast('Escolha um arquivo de imagem'); return; }
+    resizePhoto(f).then(data=>{ state.profile.photo=data; persistProfile(); render(); toast('Foto atualizada'); })
+      .catch(()=>toast('Não consegui abrir essa imagem. Tente outra foto.'));
+    return;
+  }
+  if(e.target.id==='fAccent'){ render(); return; }
+  if(e.target.id==='fPart'){
+    const key=state.cursor; const m=state.months[key]=Object.assign(emptyMonth(), state.months[key]||{});
+    m.participated=e.target.checked; persistMonth(key); render();
+  }
+});
+
+/* ---------- tick ---------- */
+setInterval(()=>{
+  if(state.tab!=='contador' || !state.profile.timer.running) return;
+  const c=$('#clock'); if(c) c.textContent=fmtClock(timerMs());
+}, 1000);
+
+render();
+connect();
+})();
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+}
+if (navigator.storage && navigator.storage.persist) { navigator.storage.persist().catch(() => {}); }
+</script>
+</body>
+</html>

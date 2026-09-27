@@ -11,7 +11,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="favicon.png" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<script>window.__PWA__ = true; window.__APP_VERSION__ = 5;</script>
+<script>window.__PWA__ = true; window.__APP_VERSION__ = 7;</script>
 <title>Meu Ministério</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -189,11 +189,32 @@ input[type=text],input[type=number],input[type=date],select{background:var(--gro
 .sizes button{display:flex;flex-direction:column;align-items:center;gap:2px;line-height:1.1}
 .sizes button b{font-family:var(--display)}
 .preview{background:var(--sunk);border-radius:10px;padding:12px 14px}
+/* People */
+.plist{display:flex;flex-direction:column;gap:12px}
+.pcard{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.pcard .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.pcard h3{margin:0;font:700 1.1rem/1.2 var(--display);overflow-wrap:anywhere}
+.pline{display:flex;gap:8px;align-items:flex-start;font-size:.92rem;overflow-wrap:anywhere}
+.pline svg{width:1.05rem;height:1.05rem;flex:none;margin-top:.2rem;stroke:var(--muted);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.pnotes{font-size:.88rem;color:var(--muted);background:var(--sunk);border-radius:8px;padding:8px 10px;white-space:pre-wrap;overflow-wrap:anywhere}
+.pill{font-size:.75rem;font-weight:700;padding:3px 9px;border-radius:999px;white-space:nowrap;background:var(--sunk);color:var(--muted)}
+.pill.late{background:var(--danger-soft);color:var(--danger)}
+.pill.today{background:var(--amber-soft);color:var(--amber)}
+.pill.ok{background:var(--accent-soft);color:var(--accent)}
+.pactions{display:flex;gap:4px;flex-wrap:wrap;margin-left:-8px}
+.since{font:700 1.35rem/1.1 var(--display);color:var(--accent)}
+textarea{background:var(--ground);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%;min-width:0;font:inherit;font-size:1rem;color:var(--ink);resize:vertical;min-height:4.5rem}
+.maplink{display:block;color:var(--accent);font-weight:700;font-size:.85rem;margin-top:2px}
+a.addrlink{color:var(--ink);text-decoration:none;background:var(--sunk);border-radius:10px;padding:10px 12px;margin-inline:-2px}
+a.addrlink:active{background:var(--accent-soft)}
+a.addrlink .addrtxt{text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
+a.addrlink svg{stroke:var(--accent)}
+.hint{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;background:var(--accent-soft);border-radius:10px;padding:8px 12px;font-size:.88rem}
 .banner{background:var(--amber-soft);color:var(--ink);border-radius:12px;padding:14px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
 
 /* Bottom nav */
 nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);padding:8px 12px calc(8px + env(safe-area-inset-bottom,0px));display:flex;justify-content:center;z-index:10}
-nav.tabs .in{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;width:100%;max-width:560px}
+nav.tabs .in{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;width:100%;max-width:560px}
 nav.tabs button{border:0;background:transparent;border-radius:10px;padding:8px 4px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:.78rem;font-weight:600;color:var(--muted)}
 nav.tabs button svg{width:1.4rem;height:1.4rem;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 nav.tabs button[aria-current=page]{color:var(--accent);background:var(--accent-soft)}
@@ -228,6 +249,7 @@ img{max-width:100%}
   <div class="in">
     <button data-tab="contador"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg>Contador</button>
     <button data-tab="mes"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Mês</button>
+    <button data-tab="pessoas"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c1-3.6 3.5-5.5 6.5-5.5s5.5 1.9 6.5 5.5"/><circle cx="17" cy="9" r="2.8"/><path d="M16.5 14.6c2.6.1 4.4 1.8 5.2 4.6"/></svg>Pessoas</button>
     <button data-tab="ano"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Ano</button>
     <button data-tab="ajustes"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>Perfil</button>
   </div>
@@ -283,6 +305,9 @@ const state = {
   selDay: null,
   pendingImport: null,
   editing: null,
+  people: { revisits:[], students:[] },
+  pview: 'rev',
+  pform: null,
 };
 const month = key => state.months[key] || emptyMonth();
 
@@ -290,7 +315,7 @@ const month = key => state.months[key] || emptyMonth();
 const LS = 'meu-ministerio-v1';
 const local = {
   read(){ try{ return JSON.parse(localStorage.getItem(LS)||'null'); }catch(e){ return null; } },
-  write(){ try{ localStorage.setItem(LS, JSON.stringify({profile:state.profile, months:state.months})); }catch(e){} },
+  write(){ try{ localStorage.setItem(LS, JSON.stringify({profile:state.profile, months:state.months, people:state.people})); }catch(e){} },
 };
 let remote = null;      // { profileRef, monthsCol }
 const chains = {};
@@ -307,6 +332,11 @@ function persistProfileSoon(){
   profileDirty=true; clearTimeout(profileTimer);
   profileTimer=setTimeout(()=>{ profileDirty=false; persistProfile(); }, 600);
 }
+function normPeople(p){ p=p||{}; return { revisits:Array.isArray(p.revisits)?p.revisits:[], students:Array.isArray(p.students)?p.students:[] }; }
+function persistPeople(){
+  local.write();
+  if(remote) enqueue('people', ()=>remote.peopleRef.set(clone(state.people)));
+}
 function persistMonth(key){
   local.write();
   if(remote) enqueue('m'+key, ()=>remote.monthsCol.doc(key).set(clone(state.months[key])));
@@ -314,7 +344,7 @@ function persistMonth(key){
 
 (function loadLocal(){
   const d = local.read();
-  if(d){ state.profile = Object.assign(defaultProfile(), d.profile||{}); state.months = d.months||{}; }
+  if(d){ state.profile = Object.assign(defaultProfile(), d.profile||{}); state.months = d.months||{}; state.people = normPeople(d.people); }
 })();
 
 async function connect(){
@@ -326,9 +356,11 @@ async function connect(){
     if(!db || !id){ sync.textContent='Dados salvos neste aparelho.'; return; }
     const profileRef = db.doc(`data/users/${id}/profile`);
     const monthsCol = profileRef.collection('months');
-    remote = { profileRef, monthsCol };
+    const peopleRef = profileRef.collection('lists').doc('people');
+    remote = { profileRef, monthsCol, peopleRef };
     const hadLocal = !!local.read();
-    const [pSnap, mSnap] = await Promise.all([profileRef.get(), monthsCol.get()]);
+    const [pSnap, mSnap, peSnap] = await Promise.all([profileRef.get(), monthsCol.get(), peopleRef.get()]);
+    if(!peSnap.exists && (state.people.revisits.length || state.people.students.length)) await peopleRef.set(clone(state.people));
     if(!pSnap.exists && hadLocal && state.profile.configured){ await profileRef.set(clone(state.profile)); }
     if(mSnap.empty && Object.keys(state.months).length){
       for(const k of Object.keys(state.months)) await monthsCol.doc(k).set(clone(state.months[k]));
@@ -341,6 +373,9 @@ async function connect(){
     monthsCol.onSnapshot(s=>{
       const next={}; s.docs.forEach(d=>{ next[d.id]=Object.assign(emptyMonth(), clone(d.data())); });
       state.months = next; local.write(); render();
+    }, ()=>{});
+    peopleRef.onSnapshot(s=>{
+      if(!s.exists) return; state.people = normPeople(clone(s.data())); local.write(); render();
     }, ()=>{});
     sync.textContent='Sincronizado na sua conta. Só você vê seus dados.';
   }catch(e){
@@ -462,6 +497,7 @@ function viewMes(){
         <button class="iconbtn" data-studies="1" aria-label="Mais um estudo">+</button>
       </div>
     </div>
+    ${state.people.students.length && state.people.students.length!==(m.studies||0) ? `<div class="hint"><span>Você tem ${state.people.students.length} ${state.people.students.length===1?'estudante cadastrado':'estudantes cadastrados'}.</span><button class="linkbtn" data-act="usestudents">Usar ${state.people.students.length}</button></div>`:''}
     <label class="switch"><input type="checkbox" id="fPart" ${participated(key)?'checked':''}> Participei no ministério neste mês</label>
   </section>
 
@@ -717,12 +753,132 @@ function applyTheme(){
   if(meta && window.__PWA__){ document.querySelectorAll('meta[name="theme-color"]').forEach(m=>m.setAttribute('content', getComputedStyle(root).getPropertyValue('--ground').trim() || '#F3F5F0')); }
 }
 
+/* ---------- pessoas ---------- */
+const ICON = {
+  book:'<svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5M8 7h7"/></svg>',
+  pin:'<svg viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>',
+  cal:'<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
+};
+const DUR_UNITS = [['dias','dias'],['semanas','semanas'],['meses','meses'],['anos','anos']];
+function daysBetween(aISO, bISO){ return Math.round((new Date(bISO+'T12:00:00') - new Date(aISO+'T12:00:00'))/86400000); }
+function startFromDuration(n, unit){
+  const d=new Date(); d.setHours(12,0,0,0);
+  if(unit==='dias') d.setDate(d.getDate()-n);
+  else if(unit==='semanas') d.setDate(d.getDate()-7*n);
+  else if(unit==='meses') d.setMonth(d.getMonth()-n);
+  else d.setFullYear(d.getFullYear()-n);
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+function elapsedParts(startISO){
+  const s=new Date(startISO+'T12:00:00'), t=new Date(todayISO()+'T12:00:00');
+  const days=Math.max(0, Math.round((t-s)/86400000));
+  let months=(t.getFullYear()-s.getFullYear())*12 + (t.getMonth()-s.getMonth()); if(t.getDate()<s.getDate()) months--;
+  months=Math.max(0,months);
+  return {days, months, years:Math.floor(months/12)};
+}
+function elapsedText(startISO){
+  const {days, months} = elapsedParts(startISO);
+  const pl=(n,a,b)=>`${n} ${n===1?a:b}`;
+  if(days===0) return 'Começou hoje';
+  if(days<14) return pl(days,'dia','dias');
+  if(months<2) return pl(Math.floor(days/7),'semana','semanas');
+  if(months<12) return pl(months,'mês','meses');
+  const y=Math.floor(months/12), r=months%12;
+  return pl(y,'ano','anos') + (r? ` e ${pl(r,'mês','meses')}`:'');
+}
+function durationGuess(startISO){
+  const {days, months} = elapsedParts(startISO);
+  if(months>=12 && months%12===0) return {n:months/12, unit:'anos'};
+  if(months>=2) return {n:months, unit:'meses'};
+  if(days>=14 && days%7===0) return {n:days/7, unit:'semanas'};
+  return {n:days, unit:'dias'};
+}
+function fmtDateLong(iso){ return new Date(iso+'T12:00:00').toLocaleDateString('pt-BR',{weekday:'short', day:'numeric', month:'short'}).replace('.', ''); }
+function visitPill(r){
+  if(!r.nextDate) return '<span class="pill">Sem data marcada</span>';
+  const d=daysBetween(todayISO(), r.nextDate);
+  const t = r.nextTime ? ` · ${r.nextTime}` : '';
+  if(d<0) return `<span class="pill late">Atrasada ${-d} ${d===-1?'dia':'dias'}</span>`;
+  if(d===0) return `<span class="pill today">Hoje${t}</span>`;
+  if(d===1) return `<span class="pill ok">Amanhã${t}</span>`;
+  return `<span class="pill ok">${fmtDateLong(r.nextDate)}${t}</span>`;
+}
+function mapUrl(addr){ return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(addr); }
+
+function personForm(){
+  const f=state.pform; const rev=f.kind==='rev';
+  return `<section class="card editor" id="pformCard">
+    <div class="head"><h2>${f.id ? (rev?'Editar revisita':'Editar estudante') : (rev?'Nova revisita':'Novo estudante')}</h2><button class="linkbtn" data-act="pcancel">Cancelar</button></div>
+    <label class="f">Nome${rev?' da pessoa':' do estudante'}<input type="text" id="pName" maxlength="80" placeholder="Ex.: Dona Maria" value="${esc(f.name)}"></label>
+    <label class="f">${rev?'Assunto / publicação deixada':'Publicação que estão estudando'}<input type="text" id="pPub" maxlength="120" placeholder="${rev?'Ex.: folheto Boas Notícias, assunto sobre a família':'Ex.: Seja Feliz para Sempre!, lição 5'}" value="${esc(f.pub)}"></label>
+    ${rev ? `
+    <label class="f">Endereço<input type="text" id="pAddr" maxlength="160" placeholder="Rua, número, bairro" value="${esc(f.addr)}"></label>
+    <div class="grid2">
+      <label class="f">Próxima visita<input type="date" id="pDate" value="${esc(f.nextDate)}"></label>
+      <label class="f">Horário (opcional)<input type="time" id="pTime" value="${esc(f.nextTime)}"></label>
+    </div>` : `
+    <div><div class="f" style="margin-bottom:6px">Estudando há quanto tempo?</div>
+    <div class="grid2">
+      <input type="number" id="pDurN" min="0" max="999" inputmode="numeric" placeholder="Ex.: 3" value="${esc(f.durN)}" aria-label="Quantidade">
+      <select id="pDurU" aria-label="Unidade">${DUR_UNITS.map(([v,l])=>`<option value="${v}" ${f.durU===v?'selected':''}>${l}</option>`).join('')}</select>
+    </div>
+    <span class="small muted">${f.id ? 'Mude só se quiser corrigir. O tempo continua contando sozinho a partir daqui.' : 'Deixe em branco para começar a contar a partir de hoje.'}</span></div>`}
+    <label class="f">Observações<textarea id="pNotes" maxlength="1000" placeholder="${rev?'O que conversaram, interesse, perguntas para a próxima visita':'Como está indo, próximos assuntos, dia e horário do estudo'}">${esc(f.notes)}</textarea></label>
+    <button class="btn primary" data-act="psave">${f.id?'Salvar alterações':'Salvar'}</button>
+  </section>`;
+}
+
+function viewPessoas(){
+  const P=state.people, rev=state.pview==='rev';
+  const seg=`<div class="seg" role="group" aria-label="Lista">
+    <button data-pview="rev" aria-pressed="${rev}">Revisitas (${P.revisits.length})</button>
+    <button data-pview="est" aria-pressed="${!rev}">Estudantes (${P.students.length})</button>
+  </div>`;
+  const form = state.pform ? personForm() : `<button class="btn primary" data-act="pnew">+ ${rev?'Nova revisita':'Novo estudante'}</button>`;
+  let list='';
+  if(rev){
+    const items=P.revisits.slice().sort((a,b)=>{ if(!a.nextDate && !b.nextDate) return (b.createdAt||0)-(a.createdAt||0); if(!a.nextDate) return 1; if(!b.nextDate) return -1; return a.nextDate.localeCompare(b.nextDate) || (a.nextTime||'').localeCompare(b.nextTime||''); });
+    list = items.length ? items.map(r=>{
+      if(state.pform && state.pform.id===r.id) return '';
+      const armed=state.armed==='p:'+r.id;
+      return `<article class="pcard">
+        <div class="top"><h3>${esc(r.name)}</h3>${visitPill(r)}</div>
+        ${r.pub?`<div class="pline">${ICON.book}<span>${esc(r.pub)}</span></div>`:''}
+        ${r.addr?`<a class="pline addrlink" href="${esc(mapUrl(r.addr))}" target="_blank" rel="noopener" aria-label="Abrir ${esc(r.addr)} no Google Maps">${ICON.pin}<span><span class="addrtxt">${esc(r.addr)}</span><span class="maplink">Abrir no Google Maps ›</span></span></a>`:''}
+        ${r.notes?`<div class="pnotes">${esc(r.notes)}</div>`:''}
+        <div class="pactions">
+          <button class="linkbtn" data-pedit="${esc(r.id)}">Editar</button>
+          <button class="linkbtn" data-ptostudent="${esc(r.id)}">Virou estudante</button>
+          <button class="del ${armed?'armed':''}" data-pdel="${esc(r.id)}">${armed?'Apagar?':'Apagar'}</button>
+        </div>
+      </article>`;
+    }).join('') : `<div class="empty">Nenhuma revisita ainda. Anote aqui as pessoas que você quer visitar de novo.</div>`;
+  } else {
+    const items=P.students.slice().sort((a,b)=> (a.start||'').localeCompare(b.start||''));
+    list = items.length ? items.map(e=>{
+      if(state.pform && state.pform.id===e.id) return '';
+      const armed=state.armed==='p:'+e.id;
+      return `<article class="pcard">
+        <div class="top"><h3>${esc(e.name)}</h3></div>
+        <div><div class="eyebrow">Estudando há</div><div class="since">${esc(elapsedText(e.start))}</div><div class="small muted">desde ${new Date(e.start+'T12:00:00').toLocaleDateString('pt-BR',{day:'numeric',month:'long',year:'numeric'})}</div></div>
+        ${e.pub?`<div class="pline">${ICON.book}<span>${esc(e.pub)}</span></div>`:''}
+        ${e.notes?`<div class="pnotes">${esc(e.notes)}</div>`:''}
+        <div class="pactions">
+          <button class="linkbtn" data-pedit="${esc(e.id)}">Editar</button>
+          <button class="del ${armed?'armed':''}" data-pdel="${esc(e.id)}">${armed?'Apagar?':'Apagar'}</button>
+        </div>
+      </article>`;
+    }).join('') : `<div class="empty">Nenhum estudante ainda. Cadastre as pessoas com quem você estuda a Bíblia.</div>`;
+  }
+  return `${seg}${form}<div class="plist">${list}</div>`;
+}
+
 /* ---------- render ---------- */
 function render(){
   applyTheme();
   const app = $('#app');
   const active = document.activeElement && document.activeElement.id;
-  const views = {contador:viewContador, mes:viewMes, ano:viewAno, ajustes:viewAjustes};
+  const views = {contador:viewContador, mes:viewMes, pessoas:viewPessoas, ano:viewAno, ajustes:viewAjustes};
   app.innerHTML = views[state.tab]();
   document.querySelectorAll('nav.tabs button').forEach(b=>{ if(b.dataset.tab===state.tab) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current'); });
   $('#typeChip').textContent = TYPES[state.profile.type].label + (state.profile.type==='auxiliar' ? ` · ${state.profile.goalMonth}h` : '');
@@ -736,7 +892,7 @@ function setTimer(t){ state.profile.timer = t; persistProfile(); render(); }
 
 document.addEventListener('click', e=>{
   const b = e.target.closest('button'); if(!b) return;
-  if(b.dataset.tab){ state.tab=b.dataset.tab; state.armed=null; state.editing=null; render(); window.scrollTo(0,0); return; }
+  if(b.dataset.tab){ state.tab=b.dataset.tab; state.armed=null; state.editing=null; state.pform=null; render(); window.scrollTo(0,0); return; }
   if(b.dataset.go){ state.tab=b.dataset.go; render(); window.scrollTo(0,0); return; }
   if(b.dataset.kind){ state.draft.kind=b.dataset.kind; render(); return; }
   if(b.dataset.month){ state.cursor=addMonths(state.cursor, Number(b.dataset.month)); state.armed=null; state.selDay=null; state.editing=null; render(); return; }
@@ -748,6 +904,26 @@ document.addEventListener('click', e=>{
   if(b.dataset.accent){ state.profile.accent = b.dataset.accent===DEFAULT_ACCENT ? '' : b.dataset.accent; persistProfile(); render(); return; }
   if(b.dataset.fsize){ state.profile.fontSize=b.dataset.fsize; persistProfile(); render(); return; }
   if(b.dataset.mode){ state.profile.mode=b.dataset.mode; persistProfile(); render(); return; }
+  if(b.dataset.pview){ state.pview=b.dataset.pview; state.pform=null; state.armed=null; render(); return; }
+  if(b.dataset.pedit){
+    const id=b.dataset.pedit, rev=state.pview==='rev';
+    const it=(rev?state.people.revisits:state.people.students).find(x=>x.id===id); if(!it) return;
+    if(rev) state.pform={kind:'rev', id, name:it.name||'', pub:it.pub||'', addr:it.addr||'', nextDate:it.nextDate||'', nextTime:it.nextTime||'', notes:it.notes||''};
+    else { const g=durationGuess(it.start); state.pform={kind:'est', id, name:it.name||'', pub:it.pub||'', durN:String(g.n), durU:g.unit, durTouched:false, notes:it.notes||''}; }
+    state.armed=null; render(); const c=$('#pformCard'); if(c) c.scrollIntoView({block:'start',behavior:'smooth'}); return;
+  }
+  if(b.dataset.pdel){
+    const id=b.dataset.pdel;
+    if(state.armed!=='p:'+id){ state.armed='p:'+id; render(); setTimeout(()=>{ if(state.armed==='p:'+id){ state.armed=null; render(); } },4000); return; }
+    state.people.revisits=state.people.revisits.filter(x=>x.id!==id); state.people.students=state.people.students.filter(x=>x.id!==id);
+    state.armed=null; persistPeople(); render(); toast('Apagado'); return;
+  }
+  if(b.dataset.ptostudent){
+    const r=state.people.revisits.find(x=>x.id===b.dataset.ptostudent); if(!r) return;
+    state.people.students.push({ id:uid(), name:r.name, pub:r.pub||'', start:todayISO(), notes:[r.notes, r.addr?('Endereço: '+r.addr):''].filter(Boolean).join('\n'), createdAt:Date.now() });
+    state.people.revisits=state.people.revisits.filter(x=>x.id!==r.id);
+    persistPeople(); state.pview='est'; render(); toast(`${r.name} agora está em Estudantes`); return;
+  }
   if(b.dataset.edit){ if(startEdit(b.dataset.edit, b.dataset.where)){ render(); const ed=$('#editor'); if(ed) ed.scrollIntoView({block:'center',behavior:'smooth'}); } return; }
   if(b.dataset.ekind){ if(state.editing){ state.editing.kind=b.dataset.ekind; render(); } return; }
   if(b.dataset.day){ state.selDay = state.selDay===b.dataset.day ? null : b.dataset.day; state.editing=null; render(); return; }
@@ -792,15 +968,43 @@ document.addEventListener('click', e=>{
     const card=$('#entryCard'); if(card){ card.scrollIntoView({block:'center'}); card.classList.add('flash'); const h=$('#fH'); if(h) h.focus({preventScroll:true}); }
   }
   else if(act==='export'){
-    const data=JSON.stringify({app:'meu-ministerio', version:1, savedAt:new Date().toISOString(), profile:state.profile, months:state.months});
+    const data=JSON.stringify({app:'meu-ministerio', version:1, savedAt:new Date().toISOString(), profile:state.profile, months:state.months, people:state.people});
     const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));
     a.download=`meu-ministerio-backup-${todayISO()}.json`; document.body.appendChild(a); a.click();
     setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 1000); toast('Backup salvo');
   }
   else if(act==='cancelimport'){ state.pendingImport=null; render(); }
   else if(act==='doimport'){
-    const d=state.pendingImport.data; state.profile=Object.assign(defaultProfile(), d.profile||{}); state.months=d.months||{};
-    state.pendingImport=null; local.write(); render(); toast('Backup restaurado');
+    const d=state.pendingImport.data; state.profile=Object.assign(defaultProfile(), d.profile||{}); state.months=d.months||{}; state.people=normPeople(d.people);
+    state.pendingImport=null; persistPeople(); local.write(); render(); toast('Backup restaurado');
+  }
+  else if(act==='pnew'){
+    state.pform = state.pview==='rev' ? {kind:'rev', id:null, name:'', pub:'', addr:'', nextDate:'', nextTime:'', notes:''}
+                                      : {kind:'est', id:null, name:'', pub:'', durN:'', durU:'meses', durTouched:false, notes:''};
+    render(); const n=$('#pName'); if(n) n.focus();
+  }
+  else if(act==='pcancel'){ state.pform=null; render(); }
+  else if(act==='psave'){
+    const f=state.pform; if(!f) return;
+    const name=(f.name||'').trim(); if(!name){ toast('Escreva o nome'); const n=$('#pName'); if(n) n.focus(); return; }
+    if(f.kind==='rev'){
+      const data={ name, pub:(f.pub||'').trim(), addr:(f.addr||'').trim(), nextDate:f.nextDate||'', nextTime:f.nextTime||'', notes:(f.notes||'').trim() };
+      if(f.id){ const it=state.people.revisits.find(x=>x.id===f.id); Object.assign(it,data); }
+      else state.people.revisits.push(Object.assign({id:uid(), createdAt:Date.now()}, data));
+    } else {
+      const n=parseInt(f.durN,10);
+      const it=f.id ? state.people.students.find(x=>x.id===f.id) : null;
+      let start = it ? it.start : todayISO();
+      if(!it) start = (n>0) ? startFromDuration(n, f.durU) : todayISO();
+      else if(f.durTouched) start = (n>0) ? startFromDuration(n, f.durU) : todayISO();
+      const data={ name, pub:(f.pub||'').trim(), start, notes:(f.notes||'').trim() };
+      if(it) Object.assign(it,data); else state.people.students.push(Object.assign({id:uid(), createdAt:Date.now()}, data));
+    }
+    const wasEdit=!!f.id; state.pform=null; persistPeople(); render(); toast(wasEdit?'Alterações salvas':'Salvo');
+  }
+  else if(act==='usestudents'){
+    const key=state.cursor; const m=state.months[key]=Object.assign(emptyMonth(), state.months[key]||{});
+    m.studies=state.people.students.length; persistMonth(key); render();
   }
   else if(act==='canceledit'){ state.editing=null; state.armed=null; render(); }
   else if(act==='edel'){
@@ -841,6 +1045,10 @@ function readDraft(){
 document.addEventListener('input', e=>{
   const id=e.target.id;
   if(['fDate','fH','fM','fNote'].includes(id)){ readDraft(); return; }
+  if(state.pform && ['pName','pPub','pAddr','pDate','pTime','pNotes','pDurN','pDurU'].includes(id)){
+    const f={pName:'name',pPub:'pub',pAddr:'addr',pDate:'nextDate',pTime:'nextTime',pNotes:'notes',pDurN:'durN',pDurU:'durU'}[id];
+    state.pform[f]=e.target.value; if(id==='pDurN'||id==='pDurU') state.pform.durTouched=true; return;
+  }
   if(state.editing && ['eDate','eH','eM','eNote'].includes(id)){ const f={eDate:'date',eH:'h',eM:'m',eNote:'note'}[id]; state.editing[f]=e.target.value; return; }
   if(id==='fName'){ state.profile.name=e.target.value.slice(0,60); state.profile.configured = state.profile.configured || !!state.profile.name; $('#hello').textContent = state.profile.name?`Olá, ${state.profile.name}`:'Ministério de campo'; if(!state.profile.photo){ const a=$('#bigAvatar'); if(a) a.textContent=initials(); $('#topAvatar').textContent=initials(); } persistProfileSoon(); }
   if(id==='fAccent'){ state.profile.accent=e.target.value.toUpperCase(); applyTheme(); persistProfileSoon(); return; }
@@ -864,6 +1072,7 @@ document.addEventListener('change', e=>{
     return;
   }
   if(e.target.id==='fAccent'){ render(); return; }
+  if(e.target.id==='pDurU' && state.pform){ state.pform.durU=e.target.value; state.pform.durTouched=true; return; }
   if(e.target.id==='fPart'){
     const key=state.cursor; const m=state.months[key]=Object.assign(emptyMonth(), state.months[key]||{});
     m.participated=e.target.checked; persistMonth(key); render();

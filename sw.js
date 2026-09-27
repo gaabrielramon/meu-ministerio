@@ -1,5 +1,5 @@
 // Meu Ministério — funciona sem internet e sempre busca a versão mais nova quando há internet.
-const CACHE = 'meu-ministerio-v5';
+const CACHE = 'meu-ministerio-v7';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png',
   './maskable-512.png', './apple-touch-icon.png', './favicon.png'];
 
